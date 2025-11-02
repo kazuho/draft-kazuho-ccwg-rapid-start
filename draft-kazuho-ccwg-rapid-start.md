@@ -90,8 +90,26 @@ time.
 The additive term (+4 ms) and the multiplicative term (×1.10) are RECOMMENDED
 defaults that provide tolerance for typical jitter while keeping Rapid Start out
 of the range where early queueing detection algorithms such as HyStart++ are
-known to trigger.  Therefore, HyStart++ can be used in conjunction with Rapid
+known to trigger. Therefore, HyStart++ can be used in conjunction with Rapid
 Start.
+
+
+## Pacing Requirement
+
+Rapid Start uses a more aggressive growth factor than classic slow start. When
+such growth is used, sending the initial congestion window as a short burst can
+make the sender observe a bottleneck overflow earlier than it would under evenly
+paced transmission. To ensure that Rapid Start observes the path's queueing
+behavior rather than sender-side burstiness, a sender that fully fills the
+connection's congestion window for the first time MUST use the pacing described
+in Careful Resume ({{!CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}).
+
+For connections that have no prior knowledge of the path (i.e., no previously
+saved CC parameters applicable to the 4-tuple), the sender SHOULD limit the
+initial jump window (`jump_cwnd`) to at most `2 * IW`. With this bound, the
+required pacing rate (`pacing_rate = jump_cwnd / min_rtt`) does not exceed the
+pacing rate that would be used by classic slow start with pacing, so Rapid Start
+does not create a larger burst than existing paced startup.
 
 
 # Security Considerations
