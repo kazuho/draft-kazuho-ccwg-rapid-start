@@ -1289,15 +1289,19 @@ conjunction with Rapid Start.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
 such growth is used, sending the initial congestion window as a short burst can
 make the sender observe a bottleneck overflow earlier than it would under evenly
 paced transmission. To ensure that Rapid Start observes the path's queueing
-behavior rather than sender-side burstiness, a sender that fully fills the
-connection's congestion window for the first time <span class="bcp14">MUST</span> use the pacing described
-in Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">For connections that have no prior knowledge of the path (i.e., no previously
-saved CC parameters applicable to the 4-tuple), the sender <span class="bcp14">SHOULD</span> limit the
-initial jump window (<code>jump_cwnd</code>) to at most <code>2 * IW</code>. With this bound, the
-required pacing rate (<code>pacing_rate = jump_cwnd / min_rtt</code>) does not exceed the
-pacing rate that would be used by classic slow start with pacing, so Rapid Start
-does not create a larger burst than existing paced startup.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+behavior rather than sender-side burstiness, the sender <span class="bcp14">SHOULD</span> pace the packets
+over approximately one RTT when filling the connection's congestion window for
+the first time.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">One way to accomplish that is to use Careful Resume
+<span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>, which requires that all
+packets sent in its Unvalidated Phase be paced based on <code>current_rtt</code>,
+regardless of previous knowledge. For connections that have no prior knowledge
+of the path (i.e., no previously saved CC parameters applicable to the 4-tuple),
+the sender <span class="bcp14">SHOULD</span> limit the initial jump window (<code>jump_cwnd</code>) to at most
+<code>2 * IW</code>. With this bound, the required pacing rate
+(<code>pacing_rate = jump_cwnd / min_rtt</code>) does not exceed the pacing rate that would
+be used by classic slow start with pacing, so Rapid Start does not create a
+larger burst than existing paced startup.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="congestion-handling">
@@ -1453,12 +1457,8 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-        <dd>
-<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="CAREFUL-RESUME">[CAREFUL-RESUME]</dt>
       <dd>
-<span class="refAuthor">Kuhn, N.</span>, <span class="refAuthor">Stephan, E.</span>, <span class="refAuthor">Fairhurst, G.</span>, <span class="refAuthor">Secchi, R.</span>, and <span class="refAuthor">C. Huitema</span>, <span class="refTitle">"Convergence of Congestion Control from Retained State"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tsvwg-careful-resume-24</span>, <time datetime="2025-10-01" class="refDate">1 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24">https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24</a>&gt;</span>. </dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -1470,8 +1470,12 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
         </h3>
 <dl class="references">
 <dt id="RFC9406">[RFC9406]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Balasubramanian, P.</span>, <span class="refAuthor">Huang, Y.</span>, and <span class="refAuthor">M. Olson</span>, <span class="refTitle">"HyStart++: Modified Slow Start for TCP"</span>, <span class="seriesInfo">RFC 9406</span>, <span class="seriesInfo">DOI 10.17487/RFC9406</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9406">https://www.rfc-editor.org/rfc/rfc9406</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="CAREFUL-RESUME">[CAREFUL-RESUME]</dt>
+      <dd>
+<span class="refAuthor">Kuhn, N.</span>, <span class="refAuthor">Stephan, E.</span>, <span class="refAuthor">Fairhurst, G.</span>, <span class="refAuthor">Secchi, R.</span>, and <span class="refAuthor">C. Huitema</span>, <span class="refTitle">"Convergence of Congestion Control from Retained State"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tsvwg-careful-resume-24</span>, <time datetime="2025-10-01" class="refDate">1 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24">https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

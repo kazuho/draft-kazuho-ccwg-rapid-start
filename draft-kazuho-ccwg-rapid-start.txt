@@ -155,11 +155,14 @@ Table of Contents
    window as a short burst can make the sender observe a bottleneck
    overflow earlier than it would under evenly paced transmission.  To
    ensure that Rapid Start observes the path's queueing behavior rather
-   than sender-side burstiness, a sender that fully fills the
-   connection's congestion window for the first time MUST use the pacing
-   described in Careful Resume [CAREFUL-RESUME].
+   than sender-side burstiness, the sender SHOULD pace the packets over
+   approximately one RTT when filling the connection's congestion window
+   for the first time.
 
-   For connections that have no prior knowledge of the path (i.e., no
+   One way to accomplish that is to use Careful Resume [CAREFUL-RESUME],
+   which requires that all packets sent in its Unvalidated Phase be
+   paced based on current_rtt, regardless of previous knowledge.  For
+   connections that have no prior knowledge of the path (i.e., no
    previously saved CC parameters applicable to the 4-tuple), the sender
    SHOULD limit the initial jump window (jump_cwnd) to at most 2 * IW.
    With this bound, the required pacing rate (pacing_rate = jump_cwnd /
@@ -288,6 +291,13 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
+7.2.  Informative References
+
+   [RFC9406]  Balasubramanian, P., Huang, Y., and M. Olson, "HyStart++:
+              Modified Slow Start for TCP", RFC 9406,
+              DOI 10.17487/RFC9406, May 2023,
+              <https://www.rfc-editor.org/rfc/rfc9406>.
+
    [CAREFUL-RESUME]
               Kuhn, N., Stephan, E., Fairhurst, G., Secchi, R., and C.
               Huitema, "Convergence of Congestion Control from Retained
@@ -295,13 +305,6 @@ Table of Contents
               tsvwg-careful-resume-24, 1 October 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-
               careful-resume-24>.
-
-7.2.  Informative References
-
-   [RFC9406]  Balasubramanian, P., Huang, Y., and M. Olson, "HyStart++:
-              Modified Slow Start for TCP", RFC 9406,
-              DOI 10.17487/RFC9406, May 2023,
-              <https://www.rfc-editor.org/rfc/rfc9406>.
 
 Acknowledgments
 
