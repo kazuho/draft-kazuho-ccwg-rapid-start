@@ -4,8 +4,8 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                         2 November 2025
-Expires: 6 May 2026
+Intended status: Standards Track                         3 November 2025
+Expires: 7 May 2026
 
 
                   Rapid Startup of Congestion Control
@@ -19,6 +19,17 @@ Abstract
    2× slow start.  When congestion is observed, Rapid Start immediately
    scales the window relative to the bytes passed through the bottleneck
    and hands over to normal recovery and congestion avoidance.
+
+Discussion Venues
+
+   This note is to be removed before publishing as an RFC.
+
+   Discussion of this document takes place on the Congestion Control
+   Working Group Working Group mailing list (ccwg@ietf.org), which is
+   archived at https://mailarchive.ietf.org/arch/browse/ccwg/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/kazuho/draft-kazuho-ccwg-rapid-start.
 
 Status of This Memo
 
@@ -35,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 May 2026.
+   This Internet-Draft will expire on 7 May 2026.
 
 Copyright Notice
 
@@ -58,9 +69,13 @@ Table of Contents
    3.  Algorithm
      3.1.  Rapid Start Phase
      3.2.  Pacing Requirement
+     3.3.  Congestion Handling
+       3.3.1.  Deriving the Reduction Factors
    4.  Security Considerations
    5.  IANA Considerations
-   6.  Normative References
+   6.  References
+     6.1.  Normative References
+     6.2.  Informative References
    Acknowledgments
    Author's Address
 
@@ -68,10 +83,11 @@ Table of Contents
 
    New transport connections do not know the available bandwidth or the
    bandwidth–delay product (BDP) of the path, so TCP and QUIC start from
-   an initial window and use an exponential startup (“slow start”) to
-   probe for the bottleneck.  Classic slow start doubles the congestion
-   window once per RTT; this is safe but can take several RTTs to reach
-   the path BDP on high-RTT or high-BDP paths.  This is a poor fit for
+   an initial window and use an exponential startup (“slow start”;
+   Section 3.1 of [RFC5681], Section 7.3.1 of [RFC9002]) to probe for
+   the bottleneck.  Classic slow start doubles the congestion window
+   once per RTT; this is safe but can take several RTTs to reach the
+   path BDP on high-RTT or high-BDP paths.  This is a poor fit for
    short-lived connections such as HTTP, where many connections complete
    while still in the startup phase.
 
@@ -128,8 +144,8 @@ Table of Contents
    The additive term (+4 ms) and the multiplicative term (×1.10) are
    RECOMMENDED defaults that provide tolerance for typical jitter while
    keeping Rapid Start out of the range where early queueing detection
-   algorithms such as HyStart++ are known to trigger.  Therefore,
-   HyStart++ can be used in conjunction with Rapid Start.
+   algorithms such as HyStart++ [RFC9406] are known to trigger.
+   Therefore, HyStart++ can be used in conjunction with Rapid Start.
 
 3.2.  Pacing Requirement
 
@@ -150,6 +166,89 @@ Table of Contents
    classic slow start with pacing, so Rapid Start does not create a
    larger burst than existing paced startup.
 
+3.3.  Congestion Handling
+
+   When Rapid Start observes the first packet loss or an explicit
+   congestion signal (e.g., ECN-CE), the sender enters the recovery
+   period.  The purpose of this period is to drain the queue and, after
+   the more aggressive startup, to bring the congestion window back in
+   line with the actual BDP of the path.
+
+   When entering the recovery period, the sender scales the current
+   congestion window by a silence factor.  This momentarily stops
+   transmission so that the bottleneck queue can drain by a controlled
+   amount.
+
+   cwnd *= silence_factor
+
+   During the recovery period, whenever new data is acknowledged, the
+   sender reduces the congestion window in proportion to the amount that
+   has been newly acknowledged:
+
+   cwnd -= ack_factor * bytes_newly_acked
+
+   Likewise, whenever packet loss is confirmed during the recovery
+   period, the sender reduces the congestion window in proportion to the
+   amount of data lost:
+
+   cwnd -= loss_factor * bytes_newly_lost
+
+   This approach ensures that, by the end of the recovery period, the
+   congestion window becomes a fraction of the full BDP (the sum of the
+   idle BDP and the bottleneck queue size), while keeping the silence
+   period short enough that the sender is likely to resume transmission
+   before the bottleneck is fully drained, even if the congestion window
+   had to be reduced significantly to compensate for the aggressive
+   ramp-up.
+
+   The sender SHOULD NOT reduce the congestion window below
+
+   cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+
+   because if the losses are caused purely by tail drops at the
+   bottleneck queue, the loss ratio is unlikely to exceed the reciprocal
+   of the most aggressive growth factor.
+
+   Separately, the sender MUST NOT reduce the congestion window below
+   the minima specified by [RFC5681] or [RFC9002].
+
+   The sender MAY stop reducing the congestion window size once it
+   reaches the initial window multiplied by beta.  By doing so, the
+   sender retains the same aggressiveness as classic slow start on
+   connections whose BDP is very small.
+
+3.3.1.  Deriving the Reduction Factors
+
+   The reduction factors are constants derived from beta used in the
+   congestion avoidance phase.  The factors are calculated as:
+
+   K               = 11/18
+   silence_factor  = beta + K * (1 - beta)
+   ack_factor      = K * (1 - beta)
+   loss_factor     = beta + K * (1 - beta)
+
+   Specifically, when beta is 0.5, the values are:
+
+   silence_factor  = 29/36
+   ack_factor      = 11/36
+   loss_factor     = 29/36
+
+   When beta is 0.7, the values are:
+
+   silence_factor  = 53/60
+   ack_factor      = 11/60
+   loss_factor     = 53/36
+
+   The formula guarantees the following properties:
+
+   *  When the loss ratio is 2/3, the duration of the silence period is
+      1 - beta relative to the full BDP, the same as that during the
+      congestion avoidance phase.
+
+   *  At the end of the recovery period, the congestion window becomes
+      as large as the full BDP multiplied by beta, the same as at the
+      end of the recovery period during the congestion avoidance phase.
+
 4.  Security Considerations
 
    TODO Security
@@ -158,7 +257,17 @@ Table of Contents
 
    This document has no IANA actions.
 
-6.  Normative References
+6.  References
+
+6.1.  Normative References
+
+   [RFC5681]  Allman, M., Paxson, V., and E. Blanton, "TCP Congestion
+              Control", RFC 5681, DOI 10.17487/RFC5681, September 2009,
+              <https://www.rfc-editor.org/rfc/rfc5681>.
+
+   [RFC9002]  Iyengar, J., Ed. and I. Swett, Ed., "QUIC Loss Detection
+              and Congestion Control", RFC 9002, DOI 10.17487/RFC9002,
+              May 2021, <https://www.rfc-editor.org/rfc/rfc9002>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -176,6 +285,13 @@ Table of Contents
               tsvwg-careful-resume-24, 1 October 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-
               careful-resume-24>.
+
+6.2.  Informative References
+
+   [RFC9406]  Balasubramanian, P., Huang, Y., and M. Olson, "HyStart++:
+              Modified Slow Start for TCP", RFC 9406,
+              DOI 10.17487/RFC9406, May 2023,
+              <https://www.rfc-editor.org/rfc/rfc9406>.
 
 Acknowledgments
 

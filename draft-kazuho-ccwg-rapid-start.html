@@ -1052,7 +1052,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Oku</td>
-<td class="center">Expires 6 May 2026</td>
+<td class="center">Expires 7 May 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1065,12 +1065,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-kazuho-ccwg-rapid-start-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-11-02" class="published">2 November 2025</time>
+<time datetime="2025-11-03" class="published">3 November 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-05-06">6 May 2026</time></dd>
+<dd class="expires"><time datetime="2026-05-07">7 May 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1091,6 +1091,17 @@ observed, Rapid Start immediately scales the window relative to the bytes passed
 through the bottleneck and hands over to normal recovery and congestion
 avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-discussion-venues">
+<a href="#name-discussion-venues" class="section-name selfRef">Discussion Venues</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">Discussion of this document takes place on the
+    Congestion Control Working Group Working Group mailing list (ccwg@ietf.org),
+    which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/ccwg/">https://mailarchive.ietf.org/arch/browse/ccwg/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+    <span><a href="https://github.com/kazuho/draft-kazuho-ccwg-rapid-start">https://github.com/kazuho/draft-kazuho-ccwg-rapid-start</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
         <h2 id="name-status-of-this-memo">
@@ -1110,7 +1121,7 @@ avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 6 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1154,6 +1165,14 @@ avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
                 <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-pacing-requirement" class="internal xref">Pacing Requirement</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-congestion-handling" class="internal xref">Congestion Handling</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.1">
+                    <p id="section-toc.1-1.3.2.3.2.1.1"><a href="#section-3.3.1" class="auto internal xref">3.3.1</a>.  <a href="#name-deriving-the-reduction-fact" class="internal xref">Deriving the Reduction Factors</a></p>
+</li>
+                </ul>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
@@ -1163,7 +1182,15 @@ avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
             <p id="section-toc.1-1.7.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
@@ -1182,7 +1209,8 @@ avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
       </h2>
 <p id="section-1-1">New transport connections do not know the available bandwidth or the
 bandwidth–delay product (BDP) of the path, so TCP and QUIC start from an initial
-window and use an exponential startup (“slow start”) to probe for the
+window and use an exponential startup (“slow start”;
+<span><a href="https://rfc-editor.org/rfc/rfc5681#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC5681" class="cite xref">RFC5681</a>]</span>, <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.3.1" class="relref">Section 7.3.1</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>) to probe for the
 bottleneck. Classic slow start doubles the congestion window once per RTT; this
 is safe but can take several RTTs to reach the path BDP on high-RTT or high-BDP
 paths. This is a poor fit for short-lived connections such as HTTP, where many
@@ -1243,9 +1271,9 @@ that is newly acknowledged, which results in a 2× growth of cwnd per round-trip
 time.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
 <p id="section-3.1-7">The additive term (+4 ms) and the multiplicative term (×1.10) are <span class="bcp14">RECOMMENDED</span>
 defaults that provide tolerance for typical jitter while keeping Rapid Start out
-of the range where early queueing detection algorithms such as HyStart++ are
-known to trigger. Therefore, HyStart++ can be used in conjunction with Rapid
-Start.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
+of the range where early queueing detection algorithms such as HyStart++
+<span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span> are known to trigger. Therefore, HyStart++ can be used in
+conjunction with Rapid Start.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="pacing-requirement">
@@ -1268,6 +1296,106 @@ pacing rate that would be used by classic slow start with pacing, so Rapid Start
 does not create a larger burst than existing paced startup.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="congestion-handling">
+<section id="section-3.3">
+        <h3 id="name-congestion-handling">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-congestion-handling" class="section-name selfRef">Congestion Handling</a>
+        </h3>
+<p id="section-3.3-1">When Rapid Start observes the first packet loss or an explicit congestion
+signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
+this period is to drain the queue and, after the more aggressive startup, to
+bring the congestion window back in line with the actual BDP of the path.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">When entering the recovery period, the sender scales the current congestion
+window by a silence factor. This momentarily stops transmission so that the
+bottleneck queue can drain by a controlled amount.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3-3">
+<pre>
+cwnd *= silence_factor
+</pre><a href="#section-3.3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3-4">During the recovery period, whenever new data is acknowledged, the sender
+reduces the congestion window in proportion to the amount that has been newly
+acknowledged:<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3-5">
+<pre>
+cwnd -= ack_factor * bytes_newly_acked
+</pre><a href="#section-3.3-5" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3-6">Likewise, whenever packet loss is confirmed during the recovery period, the
+sender reduces the congestion window in proportion to the amount of data lost:<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3-7">
+<pre>
+cwnd -= loss_factor * bytes_newly_lost
+</pre><a href="#section-3.3-7" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3-8">This approach ensures that, by the end of the recovery period,  the congestion
+window becomes a fraction of the full BDP (the sum of the idle BDP and the
+bottleneck queue size), while keeping the silence period short enough that the
+sender is likely to resume transmission before the bottleneck is fully drained,
+even if the congestion window had to be reduced significantly to compensate for
+the aggressive ramp-up.<a href="#section-3.3-8" class="pilcrow">¶</a></p>
+<p id="section-3.3-9">The sender <span class="bcp14">SHOULD NOT</span> reduce the congestion window below<a href="#section-3.3-9" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3-10">
+<pre>
+cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+</pre><a href="#section-3.3-10" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3-11">because if the losses are caused purely by tail drops at the bottleneck queue,
+the loss ratio is unlikely to exceed the reciprocal of the most aggressive
+growth factor.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
+<p id="section-3.3-12">Separately, the sender <span class="bcp14">MUST NOT</span> reduce the congestion window below the minima
+specified by <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>.<a href="#section-3.3-12" class="pilcrow">¶</a></p>
+<p id="section-3.3-13">The sender <span class="bcp14">MAY</span> stop reducing the congestion window size once it reaches the
+initial window multiplied by <code>beta</code>. By doing so, the sender retains the same
+aggressiveness as classic slow start on connections whose BDP is very small.<a href="#section-3.3-13" class="pilcrow">¶</a></p>
+<div id="deriving-the-reduction-factors">
+<section id="section-3.3.1">
+          <h4 id="name-deriving-the-reduction-fact">
+<a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-deriving-the-reduction-fact" class="section-name selfRef">Deriving the Reduction Factors</a>
+          </h4>
+<p id="section-3.3.1-1">The reduction factors are constants derived from <code>beta</code> used in the congestion
+avoidance phase. The factors are calculated as:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3.1-2">
+<pre>
+K               = 11/18
+silence_factor  = beta + K * (1 - beta)
+ack_factor      = K * (1 - beta)
+loss_factor     = beta + K * (1 - beta)
+</pre><a href="#section-3.3.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3.1-3">Specifically, when <code>beta</code> is 0.5, the values are:<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3.1-4">
+<pre>
+silence_factor  = 29/36
+ack_factor      = 11/36
+loss_factor     = 29/36
+</pre><a href="#section-3.3.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3.1-5">When <code>beta</code> is 0.7, the values are:<a href="#section-3.3.1-5" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-3.3.1-6">
+<pre>
+silence_factor  = 53/60
+ack_factor      = 11/60
+loss_factor     = 53/36
+</pre><a href="#section-3.3.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3.1-7">The formula guarantees the following properties:<a href="#section-3.3.1-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3.1-8.1">
+              <p id="section-3.3.1-8.1.1">When the loss ratio is 2/3, the duration of the silence period is <code>1 - beta</code>
+relative to the full BDP, the same as that during the congestion avoidance
+phase.<a href="#section-3.3.1-8.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.3.1-8.2">
+              <p id="section-3.3.1-8.2.1">At the end of the recovery period, the congestion window becomes as large as
+the full BDP multiplied by beta, the same as at the end of the recovery period
+during the congestion avoidance phase.<a href="#section-3.3.1-8.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="security-considerations">
@@ -1286,25 +1414,53 @@ does not create a larger burst than existing paced startup.<a href="#section-3.2
 <p id="section-5-1">This document has no IANA actions.<a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="sec-normative-references">
+<div id="sec-combined-references">
 <section id="section-6">
-      <h2 id="name-normative-references">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      <h2 id="name-references">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
+<div id="sec-normative-references">
+<section id="section-6.1">
+        <h3 id="name-normative-references">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
 <dl class="references">
+<dt id="RFC5681">[RFC5681]</dt>
+        <dd>
+<span class="refAuthor">Allman, M.</span>, <span class="refAuthor">Paxson, V.</span>, and <span class="refAuthor">E. Blanton</span>, <span class="refTitle">"TCP Congestion Control"</span>, <span class="seriesInfo">RFC 5681</span>, <span class="seriesInfo">DOI 10.17487/RFC5681</span>, <time datetime="2009-09" class="refDate">September 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5681">https://www.rfc-editor.org/rfc/rfc5681</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9002">[RFC9002]</dt>
+        <dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">I. Swett, Ed.</span>, <span class="refTitle">"QUIC Loss Detection and Congestion Control"</span>, <span class="seriesInfo">RFC 9002</span>, <span class="seriesInfo">DOI 10.17487/RFC9002</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9002">https://www.rfc-editor.org/rfc/rfc9002</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="CAREFUL-RESUME">[CAREFUL-RESUME]</dt>
-    <dd>
+      <dd>
 <span class="refAuthor">Kuhn, N.</span>, <span class="refAuthor">Stephan, E.</span>, <span class="refAuthor">Fairhurst, G.</span>, <span class="refAuthor">Secchi, R.</span>, and <span class="refAuthor">C. Huitema</span>, <span class="refTitle">"Convergence of Congestion Control from Retained State"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tsvwg-careful-resume-24</span>, <time datetime="2025-10-01" class="refDate">1 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24">https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-6.2">
+        <h3 id="name-informative-references">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC9406">[RFC9406]</dt>
+      <dd>
+<span class="refAuthor">Balasubramanian, P.</span>, <span class="refAuthor">Huang, Y.</span>, and <span class="refAuthor">M. Olson</span>, <span class="refTitle">"HyStart++: Modified Slow Start for TCP"</span>, <span class="seriesInfo">RFC 9406</span>, <span class="seriesInfo">DOI 10.17487/RFC9406</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9406">https://www.rfc-editor.org/rfc/rfc9406</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="acknowledgments">
