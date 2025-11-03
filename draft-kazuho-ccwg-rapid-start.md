@@ -193,7 +193,7 @@ When `beta` is 0.7, the values are:
 ~~~pseudocode
 silence_factor  = 53/60
 ack_factor      = 11/60
-loss_factor     = 53/36
+loss_factor     = 53/60
 ~~~
 
 The formula guarantees the following properties:
