@@ -1354,15 +1354,17 @@ growth factor.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
 <p id="section-3.3-12">Separately, the sender <span class="bcp14">MUST NOT</span> reduce the congestion window below the minima
 specified by <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>.<a href="#section-3.3-12" class="pilcrow">¶</a></p>
 <p id="section-3.3-13">The sender <span class="bcp14">MAY</span> stop reducing the congestion window once it reaches the initial
-window multiplied by <code>beta</code>. By doing so, the sender retains the same
-aggressiveness as classic slow start on connections whose BDP is very small.<a href="#section-3.3-13" class="pilcrow">¶</a></p>
+window multiplied by the window decrease factor. Doing so preserves classic slow
+start's aggressiveness on connections with tiny BDPs as the sender transitions
+to congestion avoidance.<a href="#section-3.3-13" class="pilcrow">¶</a></p>
 <div id="deriving-the-reduction-factors">
 <section id="section-3.3.1">
           <h4 id="name-deriving-the-reduction-fact">
 <a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-deriving-the-reduction-fact" class="section-name selfRef">Deriving the Reduction Factors</a>
           </h4>
-<p id="section-3.3.1-1">The reduction factors are constants derived from <code>beta</code>, which is used in the
-congestion-avoidance phase. The factors are calculated as:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-1">The reduction factors are constants derived from the multiplicative window
+decrease factor (beta), which is used in the congestion avoidance phase. The
+factors are calculated as:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-2">
 <pre>
 K               = 11/18
@@ -1379,7 +1381,7 @@ ack_factor      = 11/36
 loss_factor     = 29/36
 </pre><a href="#section-3.3.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3.1-5">When <code>beta</code> is 0.7, the values are:<a href="#section-3.3.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-5">When <code>beta</code> is 0.7 (i.e., that of CUBIC <span>[<a href="#RFC9438" class="cite xref">RFC9438</a>]</span>), the values are:<a href="#section-3.3.1-5" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-6">
 <pre>
 silence_factor  = 53/60
@@ -1391,7 +1393,7 @@ loss_factor     = 53/60
 <ul class="normal">
 <li class="normal" id="section-3.3.1-8.1">
               <p id="section-3.3.1-8.1.1">When the loss ratio is 2/3, the duration of the silence period is <code>1 - beta</code>
-relative to the full BDP, the same as during the congestion-avoidance phase.<a href="#section-3.3.1-8.1.1" class="pilcrow">¶</a></p>
+relative to the full BDP, the same as during the congestion avoidance phase.<a href="#section-3.3.1-8.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.3.1-8.2">
               <p id="section-3.3.1-8.2.1">At the end of the recovery period, the congestion window becomes as large as
@@ -1474,8 +1476,12 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
 <span class="refAuthor">Balasubramanian, P.</span>, <span class="refAuthor">Huang, Y.</span>, and <span class="refAuthor">M. Olson</span>, <span class="refTitle">"HyStart++: Modified Slow Start for TCP"</span>, <span class="seriesInfo">RFC 9406</span>, <span class="seriesInfo">DOI 10.17487/RFC9406</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9406">https://www.rfc-editor.org/rfc/rfc9406</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="CAREFUL-RESUME">[CAREFUL-RESUME]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Kuhn, N.</span>, <span class="refAuthor">Stephan, E.</span>, <span class="refAuthor">Fairhurst, G.</span>, <span class="refAuthor">Secchi, R.</span>, and <span class="refAuthor">C. Huitema</span>, <span class="refTitle">"Convergence of Congestion Control from Retained State"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tsvwg-careful-resume-24</span>, <time datetime="2025-10-01" class="refDate">1 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24">https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9438">[RFC9438]</dt>
+      <dd>
+<span class="refAuthor">Xu, L.</span>, <span class="refAuthor">Ha, S.</span>, <span class="refAuthor">Rhee, I.</span>, <span class="refAuthor">Goel, V.</span>, and <span class="refAuthor">L. Eggert, Ed.</span>, <span class="refTitle">"CUBIC for Fast and Long-Distance Networks"</span>, <span class="seriesInfo">RFC 9438</span>, <span class="seriesInfo">DOI 10.17487/RFC9438</span>, <time datetime="2023-08" class="refDate">August 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9438">https://www.rfc-editor.org/rfc/rfc9438</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

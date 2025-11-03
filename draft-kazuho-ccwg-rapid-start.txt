@@ -217,14 +217,15 @@ Table of Contents
    the minima specified by [RFC5681] or [RFC9002].
 
    The sender MAY stop reducing the congestion window once it reaches
-   the initial window multiplied by beta.  By doing so, the sender
-   retains the same aggressiveness as classic slow start on connections
-   whose BDP is very small.
+   the initial window multiplied by the window decrease factor.  Doing
+   so preserves classic slow start's aggressiveness on connections with
+   tiny BDPs as the sender transitions to congestion avoidance.
 
 3.3.1.  Deriving the Reduction Factors
 
-   The reduction factors are constants derived from beta, which is used
-   in the congestion-avoidance phase.  The factors are calculated as:
+   The reduction factors are constants derived from the multiplicative
+   window decrease factor (beta), which is used in the congestion
+   avoidance phase.  The factors are calculated as:
 
    K               = 11/18
    silence_factor  = beta + K * (1 - beta)
@@ -237,7 +238,7 @@ Table of Contents
    ack_factor      = 11/36
    loss_factor     = 29/36
 
-   When beta is 0.7, the values are:
+   When beta is 0.7 (i.e., that of CUBIC [RFC9438]), the values are:
 
    silence_factor  = 53/60
    ack_factor      = 11/60
@@ -247,7 +248,7 @@ Table of Contents
 
    *  When the loss ratio is 2/3, the duration of the silence period is
       1 - beta relative to the full BDP, the same as during the
-      congestion-avoidance phase.
+      congestion avoidance phase.
 
    *  At the end of the recovery period, the congestion window becomes
       as large as the full BDP multiplied by beta, the same as at the
@@ -305,6 +306,11 @@ Table of Contents
               tsvwg-careful-resume-24, 1 October 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-
               careful-resume-24>.
+
+   [RFC9438]  Xu, L., Ha, S., Rhee, I., Goel, V., and L. Eggert, Ed.,
+              "CUBIC for Fast and Long-Distance Networks", RFC 9438,
+              DOI 10.17487/RFC9438, August 2023,
+              <https://www.rfc-editor.org/rfc/rfc9438>.
 
 Acknowledgments
 
