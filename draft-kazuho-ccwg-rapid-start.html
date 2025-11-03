@@ -8,11 +8,11 @@
 <meta content="奥 一穂 (Kazuho Oku)" name="author">
 <meta content="
        This document defines Rapid Start, a congestion-control startup algorithm that
-grows the window by 3× per RTT until queue buildup is observed, so a sender can
-reach the path BDP faster than with classic 2× slow start. When congestion is
-observed, Rapid Start immediately scales the window relative to the bytes passed
-through the bottleneck and hands over to normal recovery and congestion
-avoidance. 
+grows the window by 3× per RTT until queue buildup is observed, so that a sender
+can reach the path BDP faster than with classic 2× slow start. When congestion
+is observed, Rapid Start immediately scales the window relative to the bytes
+that have passed through the bottleneck and then hands over to normal recovery
+and congestion avoidance. 
     " name="description">
 <meta content="xml2rfc 3.31.0" name="generator">
 <meta content="internet-draft" name="keyword">
@@ -1085,11 +1085,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This document defines Rapid Start, a congestion-control startup algorithm that
-grows the window by 3× per RTT until queue buildup is observed, so a sender can
-reach the path BDP faster than with classic 2× slow start. When congestion is
-observed, Rapid Start immediately scales the window relative to the bytes passed
-through the bottleneck and hands over to normal recovery and congestion
-avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+grows the window by 3× per RTT until queue buildup is observed, so that a sender
+can reach the path BDP faster than with classic 2× slow start. When congestion
+is observed, Rapid Start immediately scales the window relative to the bytes
+that have passed through the bottleneck and then hands over to normal recovery
+and congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-discussion-venues">
@@ -1211,15 +1211,16 @@ avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 bandwidth–delay product (BDP) of the path, so TCP and QUIC start from an initial
 window and use an exponential startup (“slow start”;
 <span><a href="https://rfc-editor.org/rfc/rfc5681#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC5681" class="cite xref">RFC5681</a>]</span>, <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.3.1" class="relref">Section 7.3.1</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>) to probe for the
-bottleneck. Classic slow start doubles the congestion window once per RTT; this
-is safe but can take several RTTs to reach the path BDP on high-RTT or high-BDP
-paths. This is a poor fit for short-lived connections such as HTTP, where many
-connections complete while still in the startup phase.<a href="#section-1-1" class="pilcrow">¶</a></p>
+bottleneck. Classic slow start doubles the congestion window once per RTT. This
+is safe, but on high-RTT or high-BDP paths it can still take a considerable
+amount of time to reach the path BDP. It is a poor fit for short-lived
+connections such as HTTP, where many connections complete while still in the
+startup phase.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">Rapid Start keeps this IW-based probing model but increases the congestion
 window by 3× per RTT while an RTT-sized observation window shows no queueing, so
 that the sender reaches the path BDP in fewer RTTs than with 2× slow start. Once
 queue buildup is observed in that window, Rapid Start stops using 3× growth and
-reverts to 2× growth. If actual congestion is signaled (for example by packet
+reverts to 2× growth. If actual congestion is signaled (for example, by packet
 loss or ECN), Rapid Start does not simply apply a fixed multiplicative decrease;
 instead it scales the window based on the amount of data that has passed the
 bottleneck in that round and then hands control over to normal recovery and
@@ -1251,27 +1252,27 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-3.1-1">When the path appears not to be building a queue, the sender uses a more
 aggressive startup increase than classic slow start.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">Whether the path is "not building a queue" is determined by comparing the floor
-RTT of the most recent round-trip with the connection's minimum RTT.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+RTT of the most recent round trip with the connection's minimum RTT.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <p id="section-3.1-3">Let:<a href="#section-3.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1-4.1">
             <p id="section-3.1-4.1.1"><code>min_rtt</code> be the minimum RTT observed for the connection so far; and<a href="#section-3.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.1-4.2">
-            <p id="section-3.1-4.2.1"><code>rtt_floor</code> be the minimum RTT sample observed during the last round-trip
+            <p id="section-3.1-4.2.1"><code>rtt_floor</code> be the minimum RTT sample observed during the last round trip
 (i.e., within the most recent interval of length min_rtt).<a href="#section-3.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-3.1-5">If <code>rtt_floor</code> is no greater than <code>min(min_rtt + 4ms, min_rtt * 1.10)</code>, the
+<p id="section-3.1-5">If <code>rtt_floor</code> is no greater than <code>min(min_rtt + 4 ms, min_rtt * 1.10)</code>, the
 sender increases the congestion window (cwnd) by 2 bytes for every byte that is
 newly acknowledged, which results in a 3× growth of cwnd per round-trip time.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
-<p id="section-3.1-6">If <code>rtt_floor</code> is greater than the threshold, the sender <span class="bcp14">SHOULD</span> increase the
+<p id="section-3.1-6">If <code>rtt_floor</code> is greater than this threshold, the sender <span class="bcp14">SHOULD</span> increase the
 congestion window as classic slow start does; i.e., by 1 byte for every byte
 that is newly acknowledged, which results in a 2× growth of cwnd per round-trip
 time.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
 <p id="section-3.1-7">The additive term (+4 ms) and the multiplicative term (×1.10) are <span class="bcp14">RECOMMENDED</span>
 defaults that provide tolerance for typical jitter while keeping Rapid Start out
-of the range where early queueing detection algorithms such as HyStart++
+of the range where early queueing-detection algorithms such as HyStart++
 <span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span> are known to trigger. Therefore, HyStart++ can be used in
 conjunction with Rapid Start.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
 </section>
@@ -1287,7 +1288,7 @@ make the sender observe a bottleneck overflow earlier than it would under evenly
 paced transmission. To ensure that Rapid Start observes the path's queueing
 behavior rather than sender-side burstiness, a sender that fully fills the
 connection's congestion window for the first time <span class="bcp14">MUST</span> use the pacing described
-in Careful Resume (<span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>).<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+in Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.2-2">For connections that have no prior knowledge of the path (i.e., no previously
 saved CC parameters applicable to the 4-tuple), the sender <span class="bcp14">SHOULD</span> limit the
 initial jump window (<code>jump_cwnd</code>) to at most <code>2 * IW</code>. With this bound, the
@@ -1303,8 +1304,8 @@ does not create a larger burst than existing paced startup.<a href="#section-3.2
         </h3>
 <p id="section-3.3-1">When Rapid Start observes the first packet loss or an explicit congestion
 signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
-this period is to drain the queue and, after the more aggressive startup, to
-bring the congestion window back in line with the actual BDP of the path.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+this period is (1) to drain the queue and (2) after the more aggressive startup,
+to bring the congestion window back in line with the actual BDP of the path.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
 <p id="section-3.3-2">When entering the recovery period, the sender scales the current congestion
 window by a silence factor. This momentarily stops transmission so that the
 bottleneck queue can drain by a controlled amount.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
@@ -1340,21 +1341,21 @@ the aggressive ramp-up.<a href="#section-3.3-8" class="pilcrow">¶</a></p>
 cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
 </pre><a href="#section-3.3-10" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3-11">because if the losses are caused purely by tail drops at the bottleneck queue,
+<p id="section-3.3-11">because, if the losses are caused purely by tail drops at the bottleneck queue,
 the loss ratio is unlikely to exceed the reciprocal of the most aggressive
 growth factor.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
 <p id="section-3.3-12">Separately, the sender <span class="bcp14">MUST NOT</span> reduce the congestion window below the minima
 specified by <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>.<a href="#section-3.3-12" class="pilcrow">¶</a></p>
-<p id="section-3.3-13">The sender <span class="bcp14">MAY</span> stop reducing the congestion window size once it reaches the
-initial window multiplied by <code>beta</code>. By doing so, the sender retains the same
+<p id="section-3.3-13">The sender <span class="bcp14">MAY</span> stop reducing the congestion window once it reaches the initial
+window multiplied by <code>beta</code>. By doing so, the sender retains the same
 aggressiveness as classic slow start on connections whose BDP is very small.<a href="#section-3.3-13" class="pilcrow">¶</a></p>
 <div id="deriving-the-reduction-factors">
 <section id="section-3.3.1">
           <h4 id="name-deriving-the-reduction-fact">
 <a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-deriving-the-reduction-fact" class="section-name selfRef">Deriving the Reduction Factors</a>
           </h4>
-<p id="section-3.3.1-1">The reduction factors are constants derived from <code>beta</code> used in the congestion
-avoidance phase. The factors are calculated as:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-1">The reduction factors are constants derived from <code>beta</code>, which is used in the
+congestion-avoidance phase. The factors are calculated as:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-2">
 <pre>
 K               = 11/18
@@ -1376,15 +1377,14 @@ loss_factor     = 29/36
 <pre>
 silence_factor  = 53/60
 ack_factor      = 11/60
-loss_factor     = 53/36
+loss_factor     = 53/60
 </pre><a href="#section-3.3.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-3.3.1-7">The formula guarantees the following properties:<a href="#section-3.3.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.3.1-8.1">
               <p id="section-3.3.1-8.1.1">When the loss ratio is 2/3, the duration of the silence period is <code>1 - beta</code>
-relative to the full BDP, the same as that during the congestion avoidance
-phase.<a href="#section-3.3.1-8.1.1" class="pilcrow">¶</a></p>
+relative to the full BDP, the same as during the congestion-avoidance phase.<a href="#section-3.3.1-8.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.3.1-8.2">
               <p id="section-3.3.1-8.2.1">At the end of the recovery period, the congestion window becomes as large as
