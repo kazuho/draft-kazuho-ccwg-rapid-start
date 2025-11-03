@@ -169,14 +169,16 @@ Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
 
 The sender MAY stop reducing the congestion window once it reaches the initial
-window multiplied by `beta`. By doing so, the sender retains the same
-aggressiveness as classic slow start on connections whose BDP is very small.
+window multiplied by the window decrease factor. Doing so preserves classic slow
+start's aggressiveness on connections with tiny BDPs as the sender transitions
+to congestion avoidance.
 
 
 ### Deriving the Reduction Factors
 
-The reduction factors are constants derived from `beta`, which is used in the
-congestion-avoidance phase. The factors are calculated as:
+The reduction factors are constants derived from the multiplicative window
+decrease factor (beta), which is used in the congestion avoidance phase. The
+factors are calculated as:
 
 ~~~pseudocode
 K               = 11/18
@@ -193,7 +195,7 @@ ack_factor      = 11/36
 loss_factor     = 29/36
 ~~~
 
-When `beta` is 0.7, the values are:
+When `beta` is 0.7 (i.e., that of CUBIC {{?RFC9438}}), the values are:
 
 ~~~pseudocode
 silence_factor  = 53/60
@@ -204,7 +206,7 @@ loss_factor     = 53/60
 The formula guarantees the following properties:
 
 * When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
-  relative to the full BDP, the same as during the congestion-avoidance phase.
+  relative to the full BDP, the same as during the congestion avoidance phase.
 * At the end of the recovery period, the congestion window becomes as large as
   the full BDP multiplied by beta, the same as at the end of the recovery period
   during the congestion avoidance phase.
