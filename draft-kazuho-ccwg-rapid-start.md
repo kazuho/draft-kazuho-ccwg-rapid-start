@@ -37,7 +37,8 @@ avoidance.
 
 New transport connections do not know the available bandwidth or the
 bandwidth–delay product (BDP) of the path, so TCP and QUIC start from an initial
-window and use an exponential startup (“slow start”) to probe for the
+window and use an exponential startup (“slow start”;
+{{Section 3.1 of !RFC5681}}, {{Section 7.3.1 of !RFC9002}}) to probe for the
 bottleneck. Classic slow start doubles the congestion window once per RTT; this
 is safe but can take several RTTs to reach the path BDP on high-RTT or high-BDP
 paths. This is a poor fit for short-lived connections such as HTTP, where many
@@ -89,9 +90,9 @@ time.
 
 The additive term (+4 ms) and the multiplicative term (×1.10) are RECOMMENDED
 defaults that provide tolerance for typical jitter while keeping Rapid Start out
-of the range where early queueing detection algorithms such as HyStart++ are
-known to trigger. Therefore, HyStart++ can be used in conjunction with Rapid
-Start.
+of the range where early queueing detection algorithms such as HyStart++
+{{?RFC9406}} are known to trigger. Therefore, HyStart++ can be used in
+conjunction with Rapid Start.
 
 
 ## Pacing Requirement
@@ -110,6 +111,99 @@ initial jump window (`jump_cwnd`) to at most `2 * IW`. With this bound, the
 required pacing rate (`pacing_rate = jump_cwnd / min_rtt`) does not exceed the
 pacing rate that would be used by classic slow start with pacing, so Rapid Start
 does not create a larger burst than existing paced startup.
+
+
+## Congestion Handling
+
+When Rapid Start observes the first packet loss or an explicit congestion
+signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
+this period is to drain the queue and, after the more aggressive startup, to
+bring the congestion window back in line with the actual BDP of the path.
+
+When entering the recovery period, the sender scales the current congestion
+window by a silence factor. This momentarily stops transmission so that the
+bottleneck queue can drain by a controlled amount.
+
+~~~pseudocode
+cwnd *= silence_factor
+~~~
+
+During the recovery period, whenever new data is acknowledged, the sender
+reduces the congestion window in proportion to the amount that has been newly
+acknowledged:
+
+~~~pseudocode
+cwnd -= ack_factor * bytes_newly_acked
+~~~
+
+Likewise, whenever packet loss is confirmed during the recovery period, the
+sender reduces the congestion window in proportion to the amount of data lost:
+
+~~~pseudocode
+cwnd -= loss_factor * bytes_newly_lost
+~~~
+
+This approach ensures that, by the end of the recovery period,  the congestion
+window becomes a fraction of the full BDP (the sum of the idle BDP and the
+bottleneck queue size), while keeping the silence period short enough that the
+sender is likely to resume transmission before the bottleneck is fully drained,
+even if the congestion window had to be reduced significantly to compensate for
+the aggressive ramp-up.
+
+The sender SHOULD NOT reduce the congestion window below
+
+~~~pseudocode
+cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+~~~
+
+because if the losses are caused purely by tail drops at the bottleneck queue,
+the loss ratio is unlikely to exceed the reciprocal of the most aggressive
+growth factor.
+
+Separately, the sender MUST NOT reduce the congestion window below the minima
+specified by {{RFC5681}} or {{RFC9002}}.
+
+The sender MAY stop reducing the congestion window size once it reaches the
+initial window multiplied by `beta`. By doing so, the sender retains the same
+aggressiveness as classic slow start on connections whose BDP is very small.
+
+
+### Deriving the Reduction Factors
+
+The reduction factors are constants derived from `beta` used in the congestion
+avoidance phase. The factors are calculated as:
+
+~~~pseudocode
+K               = 11/18
+silence_factor  = beta + K * (1 - beta)
+ack_factor      = K * (1 - beta)
+loss_factor     = beta + K * (1 - beta)
+~~~
+
+Specifically, when `beta` is 0.5, the values are:
+
+~~~pseudocode
+silence_factor  = 29/36
+ack_factor      = 11/36
+loss_factor     = 29/36
+~~~
+
+When `beta` is 0.7, the values are:
+
+~~~pseudocode
+silence_factor  = 53/60
+ack_factor      = 11/60
+loss_factor     = 53/36
+~~~
+
+The formula guarantees the following properties:
+
+* When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
+  relative to the full BDP, the same as that during the congestion avoidance
+  phase.
+* At the end of the recovery period, the congestion window becomes as large as
+  the full BDP multiplied by beta, the same as at the end of the recovery period
+  during the congestion avoidance phase.
 
 
 # Security Considerations
