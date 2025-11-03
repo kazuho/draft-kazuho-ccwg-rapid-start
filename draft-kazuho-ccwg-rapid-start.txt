@@ -72,11 +72,12 @@ Table of Contents
      3.2.  Pacing Requirement
      3.3.  Congestion Handling
        3.3.1.  Deriving the Reduction Factors
-   4.  Security Considerations
-   5.  IANA Considerations
-   6.  References
-     6.1.  Normative References
-     6.2.  Informative References
+   4.  Limitations
+   5.  Security Considerations
+   6.  IANA Considerations
+   7.  References
+     7.1.  Normative References
+     7.2.  Informative References
    Acknowledgments
    Author's Address
 
@@ -249,17 +250,26 @@ Table of Contents
       as large as the full BDP multiplied by beta, the same as at the
       end of the recovery period during the congestion avoidance phase.
 
-4.  Security Considerations
+4.  Limitations
+
+   To estimate the BDP during the first recovery period, Rapid Start
+   depends on the transport protocol accurately and promptly reporting
+   the traversal of each sent packet, even when the packet loss ratio is
+   high.  QUIC, with its explicit packet numbers and ACK frames capable
+   of reporting many gaps, meets this criterion.  However, with TCP,
+   there can be issues producing a reliable estimate.
+
+5.  Security Considerations
 
    TODO Security
 
-5.  IANA Considerations
+6.  IANA Considerations
 
    This document has no IANA actions.
 
-6.  References
+7.  References
 
-6.1.  Normative References
+7.1.  Normative References
 
    [RFC5681]  Allman, M., Paxson, V., and E. Blanton, "TCP Congestion
               Control", RFC 5681, DOI 10.17487/RFC5681, September 2009,
@@ -286,7 +296,7 @@ Table of Contents
               <https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-
               careful-resume-24>.
 
-6.2.  Informative References
+7.2.  Informative References
 
    [RFC9406]  Balasubramanian, P., Huang, Y., and M. Olson, "HyStart++:
               Modified Slow Start for TCP", RFC 9406,
