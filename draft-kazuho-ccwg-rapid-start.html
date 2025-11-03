@@ -1493,7 +1493,13 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">TODO acknowledge.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani,
+et. al.) advocates a similar approach that increases the congestion window by 4×
+per round-trip, using a predictive mechanism coupled with HyStart. Compared to
+SUSS, Rapid Start is simpler and allows reuse of existing mechanisms and
+specifications such as pacing, HyStart++, and Careful Resume. Rapid Start also
+specifies how the congestion window should be decreased upon congestion,
+allowing a smooth transition to congestion avoidance.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
