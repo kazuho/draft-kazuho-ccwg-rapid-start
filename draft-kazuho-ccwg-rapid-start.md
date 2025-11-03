@@ -102,16 +102,20 @@ Rapid Start uses a more aggressive growth factor than classic slow start. When
 such growth is used, sending the initial congestion window as a short burst can
 make the sender observe a bottleneck overflow earlier than it would under evenly
 paced transmission. To ensure that Rapid Start observes the path's queueing
-behavior rather than sender-side burstiness, a sender that fully fills the
-connection's congestion window for the first time MUST use the pacing described
-in Careful Resume {{!CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}.
+behavior rather than sender-side burstiness, the sender SHOULD pace the packets
+over approximately one RTT when filling the connection's congestion window for
+the first time.
 
-For connections that have no prior knowledge of the path (i.e., no previously
-saved CC parameters applicable to the 4-tuple), the sender SHOULD limit the
-initial jump window (`jump_cwnd`) to at most `2 * IW`. With this bound, the
-required pacing rate (`pacing_rate = jump_cwnd / min_rtt`) does not exceed the
-pacing rate that would be used by classic slow start with pacing, so Rapid Start
-does not create a larger burst than existing paced startup.
+One way to accomplish that is to use Careful Resume
+{{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}, which requires that all
+packets sent in its Unvalidated Phase be paced based on `current_rtt`,
+regardless of previous knowledge. For connections that have no prior knowledge
+of the path (i.e., no previously saved CC parameters applicable to the 4-tuple),
+the sender SHOULD limit the initial jump window (`jump_cwnd`) to at most
+`2 * IW`. With this bound, the required pacing rate
+(`pacing_rate = jump_cwnd / min_rtt`) does not exceed the pacing rate that would
+be used by classic slow start with pacing, so Rapid Start does not create a
+larger burst than existing paced startup.
 
 
 ## Congestion Handling
