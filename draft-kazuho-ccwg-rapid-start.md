@@ -236,10 +236,10 @@ This document has no IANA actions.
 # Acknowledgments
 {:numbered="false"}
 
-"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani,
-et. al.) advocates a similar approach that increases the congestion window by 4×
-per round-trip, using a predictive mechanism coupled with HyStart. Compared to
-SUSS, Rapid Start is simpler and allows reuse of existing mechanisms and
-specifications such as pacing, HyStart++, and Careful Resume. Rapid Start also
-specifies how the congestion window should be decreased upon congestion,
-allowing a smooth transition to congestion avoidance.
+"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
+al.) advocates a similar approach built on top of HyStart that increases the
+congestion window by up to 4× per round-trip based on ACK dispersal and RTT.
+Compared to SUSS, Rapid Start, relying solely on RTT, is simpler and allows
+reuse of existing mechanisms and specifications such as pacing, HyStart++, and
+Careful Resume. Rapid Start also specifies how the congestion window should be
+decreased upon congestion, allowing a smooth transition to congestion avoidance.
