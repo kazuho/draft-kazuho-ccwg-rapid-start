@@ -4,8 +4,8 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                         3 November 2025
-Expires: 7 May 2026
+Intended status: Standards Track                         4 November 2025
+Expires: 8 May 2026
 
 
                   Rapid Startup of Congestion Control
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 May 2026.
+   This Internet-Draft will expire on 8 May 2026.
 
 Copyright Notice
 
@@ -315,13 +315,14 @@ Table of Contents
 Acknowledgments
 
    "SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi
-   Arghavani, et. al.) advocates a similar approach that increases the
-   congestion window by 4× per round-trip, using a predictive mechanism
-   coupled with HyStart.  Compared to SUSS, Rapid Start is simpler and
-   allows reuse of existing mechanisms and specifications such as
-   pacing, HyStart++, and Careful Resume.  Rapid Start also specifies
-   how the congestion window should be decreased upon congestion,
-   allowing a smooth transition to congestion avoidance.
+   Arghavani et al.) advocates a similar approach built on top of
+   HyStart that increases the congestion window by up to 4× per round-
+   trip based on ACK dispersal and RTT.  Compared to SUSS, Rapid Start,
+   relying solely on RTT, is simpler and allows reuse of existing
+   mechanisms and specifications such as pacing, HyStart++, and Careful
+   Resume.  Rapid Start also specifies how the congestion window should
+   be decreased upon congestion, allowing a smooth transition to
+   congestion avoidance.
 
 Author's Address
 
