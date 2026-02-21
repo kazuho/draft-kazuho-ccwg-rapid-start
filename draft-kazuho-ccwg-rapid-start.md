@@ -38,14 +38,23 @@ avoiding bursts, before handing over to ordinary congestion avoidance.
 # Introduction
 
 New transport connections do not know the available bandwidth or the
-bandwidth–delay product (BDP) of the path, so TCP and QUIC start from an initial
+bandwidth-delay product (BDP) of the path, so TCP and QUIC start from an initial
 window and use an exponential startup (“slow start”;
 {{Section 3.1 of !RFC5681}}, {{Section 7.3.1 of !RFC9002}}) to probe for the
-bottleneck. Classic slow start doubles the congestion window once per RTT. This
-is safe, but on high-RTT or high-BDP paths it can still take a considerable
-amount of time to reach the path BDP. It is a poor fit for short-lived
-connections such as HTTP, where many connections complete while still in the
-startup phase.
+bottleneck, often paired with pacing to reduce sender-side burstiness. In
+practice, paced slow start can still leave performance on the table:
+
+* The sender typically starts by pacing packets for half an RTT and then
+  pausing. When the bottleneck bandwidth is higher than the paced rate, the
+  bottleneck can remain idle for the other half of each RTT.
+* Even when the bottleneck is being utilized, utilization remains below capacity
+  until queueing begins.
+* When the initial window is much smaller than the path BDP, many round-trips
+  are required to ramp up.
+
+These effects are particularly detrimental to short-lived flows, which may only
+have a few round-trips to send data and therefore suffer disproportionately from
+underutilization during the startup.
 
 Rapid Start keeps this IW-based probing model but increases the congestion
 window by 3× per RTT while an RTT-sized observation window shows no queueing, so
