@@ -106,28 +106,31 @@ Similarly to Slow Start, Rapid Start increases the congestion window as packets
 are acknowledged. The difference is that when the path appears not to be
 building a queue, the sender uses a more aggressive startup increase.
 
-Whether the path is "not building a queue" is determined by comparing the floor
-RTT of the most recent round trip with the connection's minimum RTT.
+Whether the path appears not to be building a queue is determined by comparing
+`rtt_floor` against `queue_buildup_thresh`.
 
 Let:
 
-* `min_rtt` be the minimum RTT observed for the connection so far; and
+* `min_rtt` be the minimum RTT observed for the connection so far;
 
 * `rtt_floor` be the minimum RTT sample observed during the most recent
-   `min_rtt` interval.
+   `min_rtt` interval; and
 
-If `rtt_floor` is no greater than `min(min_rtt + 4 ms, min_rtt * 1.10)`, the
-sender increases the congestion window (cwnd) by 2 bytes for every byte that is
-newly acknowledged, which results in a 3× growth of cwnd per round-trip time.
+* `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`.
 
-If `rtt_floor` is greater than this threshold, the sender SHOULD increase the
-congestion window as classic slow start does; i.e., by 1 byte for every byte
-that is newly acknowledged, which results in a 2× growth of cwnd per round-trip
-time.
+If `rtt_floor` is no greater than `queue_buildup_thresh`, the sender increases
+the congestion window (cwnd) by 2 bytes for every byte that is newly
+acknowledged, which results in a 3× growth of cwnd per round-trip.
 
-The additive term (+4 ms) and the multiplicative term (×1.10) are RECOMMENDED
-defaults that provide tolerance for typical jitter while keeping Rapid Start out
-of the range where early queueing-detection algorithms such as HyStart++
+If `rtt_floor` is greater than `queue_buildup_thresh`, the sender SHOULD
+increase the congestion window as in classic slow start; i.e., by 1 byte for
+every byte that is newly acknowledged, which results in a 2× growth of cwnd per
+round-trip.
+
+The additive term (+4 ms) and the multiplicative term (×1.10) of
+`queue_buildup_thresh` are RECOMMENDED defaults that provide tolerance for
+typical jitter while keeping Rapid Start's aggressive growth out of the RTT
+inflation range where early queueing-detection algorithms such as HyStart++
 {{?RFC9406}} are known to trigger. Therefore, HyStart++ can be used in
 conjunction with Rapid Start.
 
