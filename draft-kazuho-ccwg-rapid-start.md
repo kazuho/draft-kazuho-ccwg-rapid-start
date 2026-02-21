@@ -174,7 +174,7 @@ start's aggressiveness on connections with tiny BDPs as the sender transitions
 to congestion avoidance.
 
 
-### Deriving the Reduction Factors
+### Deriving the Reduction Factors {#reduction-factors}
 
 The reduction factors are constants derived from the multiplicative window
 decrease factor (beta), which is used in the congestion avoidance phase. The
@@ -210,6 +210,41 @@ The formula guarantees the following properties:
 * At the end of the recovery period, the congestion window becomes as large as
   the full BDP multiplied by beta, the same as at the end of the recovery period
   during the congestion avoidance phase.
+
+
+### Interaction with ECN
+
+{{reduction-factors}} provides the rationale for the recovery behavior in terms
+of the full BDP (which, under loss-based detection, includes filling the
+bottleneck queue up to the point it overflows and packets are dropped). However,
+when congestion happens on an ECN-capable path, it can be reported via CE marks
+without requiring packet loss. If Rapid Start enters a recovery period upon
+observing a CE mark but no packets are lost, then it exits that recovery period
+with a congestion window that is beta times its size upon entering recovery.
+
+If the growth factor in the last round-trip was 3×, the congestion window upon
+entering recovery can be larger than with 2×, and therefore the congestion
+window at the end of recovery (beta times the entry size) can also be larger.
+This makes the next recovery period start sooner, but otherwise does not change
+the flow's behavior under ECN-signaled congestion pressure.
+
+The other concern is buffer overflow before CE feedback is observed. Under 3×
+growth, the sender might build up a bottleneck queue that is twice as large as
+under 2× growth. However, even in the extreme case where a network’s buffering
+margin is tightly provisioned for a target maximum RTT under conventional slow
+start (i.e., 2× growth), this larger queue buildup under 3× growth simply halves
+the loss-free RTT range: only connections with RTTs above half of that target
+maximum would be affected. In practice, networks do not generally provision
+buffers that tightly; with ECN, they can signal congestion without relying on
+drop, so leaving extra buffering margin typically has little downside. For these
+reasons, this overflow risk is limited in practice.
+
+On loss-based paths, a more aggressive startup increases the likelihood of
+overflowing the bottleneck buffer and triggering packet drops, which delays
+delivery to the application due to retransmission. In contrast, on ECN-capable
+paths, congestion is typically signaled without relying on packet drops, so this
+loss-induced delivery delay mode is largely avoided. As a result, the benefits
+of faster growth of the congestion window are more reliable.
 
 
 # Limitations
