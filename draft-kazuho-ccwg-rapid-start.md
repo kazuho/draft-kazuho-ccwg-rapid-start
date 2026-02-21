@@ -74,8 +74,8 @@ such growth is used, sending the initial congestion window as a short burst can
 make the sender observe a bottleneck overflow earlier than it would under evenly
 paced transmission. To ensure that Rapid Start observes the path's queueing
 behavior rather than sender-side burstiness, the sender SHOULD pace the packets
-over approximately one RTT when filling the connection's congestion window for
-the first time.
+over a full RTT, using the current RTT estimate, when sending the first window's
+worth of data.
 
 One way to accomplish that is to use Careful Resume
 {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}, which requires that all
