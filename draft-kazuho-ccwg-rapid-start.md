@@ -219,8 +219,9 @@ of the full BDP (which, under loss-based detection, includes filling the
 bottleneck queue up to the point it overflows and packets are dropped). However,
 when congestion happens on an ECN-capable path, it can be reported via CE marks
 without requiring packet loss. If Rapid Start enters a recovery period upon
-observing a CE mark but no packets are lost, then it exits that recovery period
-with a congestion window that is beta times its size upon entering recovery.
+observing a CE mark but no packets are lost, then it exits recovery with a
+congestion window that is beta times its size immediately before entering
+recovery.
 
 If the growth factor in the last round-trip was 3×, the congestion window upon
 entering recovery can be larger than with 2×, and therefore the congestion
