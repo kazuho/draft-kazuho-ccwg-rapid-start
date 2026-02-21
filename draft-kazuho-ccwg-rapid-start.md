@@ -24,11 +24,12 @@ informative:
 --- abstract
 
 This document defines Rapid Start, a congestion-control startup algorithm that
-grows the window by 3× per RTT until queue buildup is observed, so that a sender
-can reach the path BDP faster than with classic 2× slow start. When congestion
-is observed, Rapid Start immediately scales the window relative to the bytes
-that have passed through the bottleneck and then hands over to normal recovery
-and congestion avoidance.
+grows the congestion window by 3× per RTT until queue buildup is observed, so
+that a sender can reach the path BDP faster than with classic 2× slow start.
+When congestion is observed, Rapid Start gradually reduces the window in
+proportion to delivered and lost bytes, converging to the appropriate window
+size while avoiding bursts, before handing over to normal recovery and
+congestion avoidance.
 
 
 --- middle
