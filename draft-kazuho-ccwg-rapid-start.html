@@ -7,13 +7,14 @@
 <title>Rapid Startup of Congestion Control</title>
 <meta content="奥 一穂 (Kazuho Oku)" name="author">
 <meta content="
-       This document defines Rapid Start, a congestion-control startup algorithm that
-grows the congestion window by 3× per RTT until queue buildup is observed, so
-that a sender can reach the path BDP faster than with classic 2× slow start.
-When congestion is observed, Rapid Start gradually reduces the window in
-proportion to delivered and lost bytes, converging to the appropriate window
-size while avoiding bursts, before handing over to normal recovery and
-congestion avoidance. 
+       This document defines Rapid Start, a congestion-control startup algorithm. It
+paces the transmission of the initial congestion window over a full RTT,
+allowing an initial window up to 2× that of classic slow start with pacing at a
+comparable pacing rate. It then grows the window by 3× per RTT until queue build
+up is observed, after which it reverts to classic 2× slow start growth. When
+congestion is signaled, Rapid Start smoothly converges the window based on
+delivered data, avoiding bursts and underutilization, before handing over to
+ordinary congestion avoidance. 
     " name="description">
 <meta content="xml2rfc 3.31.0" name="generator">
 <meta content="internet-draft" name="keyword">
@@ -1087,13 +1088,14 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <h1 id="title">Rapid Startup of Congestion Control</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document defines Rapid Start, a congestion-control startup algorithm that
-grows the congestion window by 3× per RTT until queue buildup is observed, so
-that a sender can reach the path BDP faster than with classic 2× slow start.
-When congestion is observed, Rapid Start gradually reduces the window in
-proportion to delivered and lost bytes, converging to the appropriate window
-size while avoiding bursts, before handing over to normal recovery and
-congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document defines Rapid Start, a congestion-control startup algorithm. It
+paces the transmission of the initial congestion window over a full RTT,
+allowing an initial window up to 2× that of classic slow start with pacing at a
+comparable pacing rate. It then grows the window by 3× per RTT until queue build
+up is observed, after which it reverts to classic 2× slow start growth. When
+congestion is signaled, Rapid Start smoothly converges the window based on
+delivered data, avoiding bursts and underutilization, before handing over to
+ordinary congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-discussion-venues">
@@ -1164,10 +1166,10 @@ congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-algorithm" class="internal xref">Algorithm</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
-                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-rapid-start-phase" class="internal xref">Rapid Start Phase</a></p>
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-sending-in-the-first-round-" class="internal xref">Sending in the First Round Trip</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
-                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-pacing-requirement" class="internal xref">Pacing Requirement</a></p>
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-increasing-the-congestion-w" class="internal xref">Increasing the Congestion Window</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
                 <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-congestion-handling" class="internal xref">Congestion Handling</a></p>
@@ -1218,23 +1220,41 @@ congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">New transport connections do not know the available bandwidth or the
-bandwidth–delay product (BDP) of the path, so TCP and QUIC start from an initial
+bandwidth-delay product (BDP) of the path, so TCP and QUIC start from an initial
 window and use an exponential startup (“slow start”;
 <span><a href="https://rfc-editor.org/rfc/rfc5681#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC5681" class="cite xref">RFC5681</a>]</span>, <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.3.1" class="relref">Section 7.3.1</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>) to probe for the
-bottleneck. Classic slow start doubles the congestion window once per RTT. This
-is safe, but on high-RTT or high-BDP paths it can still take a considerable
-amount of time to reach the path BDP. It is a poor fit for short-lived
-connections such as HTTP, where many connections complete while still in the
-startup phase.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">Rapid Start keeps this IW-based probing model but increases the congestion
-window by 3× per RTT while an RTT-sized observation window shows no queueing, so
-that the sender reaches the path BDP in fewer RTTs than with 2× slow start. Once
-queue buildup is observed in that window, Rapid Start stops using 3× growth and
-reverts to 2× growth. If actual congestion is signaled (for example, by packet
-loss or ECN), Rapid Start does not simply apply a fixed multiplicative decrease;
-instead it scales the window based on the amount of data that has passed the
-bottleneck in that round and then hands control over to normal recovery and
-congestion avoidance.<a href="#section-1-2" class="pilcrow">¶</a></p>
+bottleneck, often paired with pacing to reduce sender-side burstiness. In
+practice, paced slow start can still leave performance on the table:<a href="#section-1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-2.1">
+          <p id="section-1-2.1.1">The sender typically starts by pacing packets for half an RTT and then
+pausing. When the bottleneck bandwidth is higher than the paced rate, the
+bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-2.2">
+          <p id="section-1-2.2.1">Even when the bottleneck is being utilized, utilization remains below capacity
+until queueing begins.<a href="#section-1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-2.3">
+          <p id="section-1-2.3.1">When the initial window is much smaller than the path BDP, many round-trips
+are required to ramp up.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-3">These effects are particularly detrimental to short-lived flows, which may only
+have a few round-trips to send data and therefore suffer disproportionately from
+underutilization during the startup.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">Rapid Start retains the initial-window-based probing model but mitigates these
+issues. It paces the initial congestion window over the full estimated RTT,
+allowing an initial window up to 2× that of classic slow start at a comparable
+pacing rate. It then grows the congestion window by 3× per round-trip until
+queue buildup is observed, after which it reverts to classic 2× growth. When
+congestion is signaled, Rapid Start momentarily pauses transmission and then
+reduces the window gradually in proportion to delivered and lost bytes. Doing so
+avoids burstiness as well as mitigating the risk of the bottleneck buffer
+becoming empty and the path becoming underutilized during recovery. After
+recovery, control is handed over to ordinary congestion avoidance, such as that
+of NewReno (<span>[<a href="#RFC6582" class="cite xref">RFC6582</a>]</span>) and QUIC congestion control
+(<span><a href="https://rfc-editor.org/rfc/rfc9002#section-7" class="relref">Section 7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>).<a href="#section-1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1254,61 +1274,59 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-algorithm" class="section-name selfRef">Algorithm</a>
       </h2>
 <p id="section-3-1">This section describes the algorithm used by Rapid Start.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<div id="rapid-start-phase">
+<div id="sending-in-the-first-round-trip">
 <section id="section-3.1">
-        <h3 id="name-rapid-start-phase">
-<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-rapid-start-phase" class="section-name selfRef">Rapid Start Phase</a>
+        <h3 id="name-sending-in-the-first-round-">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-sending-in-the-first-round-" class="section-name selfRef">Sending in the First Round Trip</a>
         </h3>
-<p id="section-3.1-1">When the path appears not to be building a queue, the sender uses a more
-aggressive startup increase than classic slow start.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.1-2">Whether the path is "not building a queue" is determined by comparing the floor
-RTT of the most recent round trip with the connection's minimum RTT.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.1-3">Let:<a href="#section-3.1-3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-3.1-4.1">
-            <p id="section-3.1-4.1.1"><code>min_rtt</code> be the minimum RTT observed for the connection so far; and<a href="#section-3.1-4.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-3.1-4.2">
-            <p id="section-3.1-4.2.1"><code>rtt_floor</code> be the minimum RTT sample observed during the last round trip
-(i.e., within the most recent interval of length min_rtt).<a href="#section-3.1-4.2.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-3.1-5">If <code>rtt_floor</code> is no greater than <code>min(min_rtt + 4 ms, min_rtt * 1.10)</code>, the
-sender increases the congestion window (cwnd) by 2 bytes for every byte that is
-newly acknowledged, which results in a 3× growth of cwnd per round-trip time.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
-<p id="section-3.1-6">If <code>rtt_floor</code> is greater than this threshold, the sender <span class="bcp14">SHOULD</span> increase the
-congestion window as classic slow start does; i.e., by 1 byte for every byte
-that is newly acknowledged, which results in a 2× growth of cwnd per round-trip
-time.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
-<p id="section-3.1-7">The additive term (+4 ms) and the multiplicative term (×1.10) are <span class="bcp14">RECOMMENDED</span>
-defaults that provide tolerance for typical jitter while keeping Rapid Start out
-of the range where early queueing-detection algorithms such as HyStart++
-<span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span> are known to trigger. Therefore, HyStart++ can be used in
-conjunction with Rapid Start.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="pacing-requirement">
-<section id="section-3.2">
-        <h3 id="name-pacing-requirement">
-<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-pacing-requirement" class="section-name selfRef">Pacing Requirement</a>
-        </h3>
-<p id="section-3.2-1">Rapid Start uses a more aggressive growth factor than classic slow start. When
+<p id="section-3.1-1">Rapid Start uses a more aggressive growth factor than classic slow start. When
 such growth is used, sending the initial congestion window as a short burst can
 make the sender observe a bottleneck overflow earlier than it would under evenly
 paced transmission. To ensure that Rapid Start observes the path's queueing
 behavior rather than sender-side burstiness, the sender <span class="bcp14">SHOULD</span> pace the packets
-over approximately one RTT when filling the connection's congestion window for
-the first time.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">One way to accomplish that is to use Careful Resume
-<span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>, which requires that all
-packets sent in its Unvalidated Phase be paced based on <code>current_rtt</code>,
-regardless of previous knowledge. For connections that have no prior knowledge
-of the path (i.e., no previously saved CC parameters applicable to the 4-tuple),
-the sender <span class="bcp14">SHOULD</span> limit the initial jump window (<code>jump_cwnd</code>) to at most
-<code>2 * IW</code>. With this bound, the required pacing rate
-(<code>pacing_rate = jump_cwnd / min_rtt</code>) does not exceed the pacing rate that would
-be used by classic slow start with pacing, so Rapid Start does not create a
-larger burst than existing paced startup.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+over a full RTT, using the current RTT estimate, when sending the first window's
+worth of data.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">When pacing over a full RTT, Rapid Start can use an initial window up to 2× that
+of classic slow start with pacing, because spreading the transmission over a
+full RTT (rather than half an RTT) yields a comparable pacing rate.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">A sender using Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>
+satisfies these recommendations, because it requires that all packets sent in
+its Unvalidated Phase be paced based on <code>current_rtt</code>, regardless of prior
+knowledge.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="increasing-the-congestion-window">
+<section id="section-3.2">
+        <h3 id="name-increasing-the-congestion-w">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-increasing-the-congestion-w" class="section-name selfRef">Increasing the Congestion Window</a>
+        </h3>
+<p id="section-3.2-1">Similarly to Slow Start, Rapid Start increases the congestion window as packets
+are acknowledged. The difference is that when the path appears not to be
+building a queue, the sender uses a more aggressive startup increase.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">Whether the path is "not building a queue" is determined by comparing the floor
+RTT of the most recent round trip with the connection's minimum RTT.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">Let:<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-4.1">
+            <p id="section-3.2-4.1.1"><code>min_rtt</code> be the minimum RTT observed for the connection so far; and<a href="#section-3.2-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-4.2">
+            <p id="section-3.2-4.2.1"><code>rtt_floor</code> be the minimum RTT sample observed during the most recent
+ <code>min_rtt</code> interval.<a href="#section-3.2-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.2-5">If <code>rtt_floor</code> is no greater than <code>min(min_rtt + 4 ms, min_rtt * 1.10)</code>, the
+sender increases the congestion window (cwnd) by 2 bytes for every byte that is
+newly acknowledged, which results in a 3× growth of cwnd per round-trip time.<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<p id="section-3.2-6">If <code>rtt_floor</code> is greater than this threshold, the sender <span class="bcp14">SHOULD</span> increase the
+congestion window as classic slow start does; i.e., by 1 byte for every byte
+that is newly acknowledged, which results in a 2× growth of cwnd per round-trip
+time.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
+<p id="section-3.2-7">The additive term (+4 ms) and the multiplicative term (×1.10) are <span class="bcp14">RECOMMENDED</span>
+defaults that provide tolerance for typical jitter while keeping Rapid Start out
+of the range where early queueing-detection algorithms such as HyStart++
+<span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span> are known to trigger. Therefore, HyStart++ can be used in
+conjunction with Rapid Start.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="congestion-handling">
@@ -1515,13 +1533,17 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="RFC9406">[RFC9406]</dt>
+<dt id="RFC6582">[RFC6582]</dt>
         <dd>
-<span class="refAuthor">Balasubramanian, P.</span>, <span class="refAuthor">Huang, Y.</span>, and <span class="refAuthor">M. Olson</span>, <span class="refTitle">"HyStart++: Modified Slow Start for TCP"</span>, <span class="seriesInfo">RFC 9406</span>, <span class="seriesInfo">DOI 10.17487/RFC9406</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9406">https://www.rfc-editor.org/rfc/rfc9406</a>&gt;</span>. </dd>
+<span class="refAuthor">Henderson, T.</span>, <span class="refAuthor">Floyd, S.</span>, <span class="refAuthor">Gurtov, A.</span>, and <span class="refAuthor">Y. Nishida</span>, <span class="refTitle">"The NewReno Modification to TCP's Fast Recovery Algorithm"</span>, <span class="seriesInfo">RFC 6582</span>, <span class="seriesInfo">DOI 10.17487/RFC6582</span>, <time datetime="2012-04" class="refDate">April 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6582">https://www.rfc-editor.org/rfc/rfc6582</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="CAREFUL-RESUME">[CAREFUL-RESUME]</dt>
         <dd>
 <span class="refAuthor">Kuhn, N.</span>, <span class="refAuthor">Stephan, E.</span>, <span class="refAuthor">Fairhurst, G.</span>, <span class="refAuthor">Secchi, R.</span>, and <span class="refAuthor">C. Huitema</span>, <span class="refTitle">"Convergence of Congestion Control from Retained State"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tsvwg-careful-resume-24</span>, <time datetime="2025-10-01" class="refDate">1 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24">https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-careful-resume-24</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9406">[RFC9406]</dt>
+        <dd>
+<span class="refAuthor">Balasubramanian, P.</span>, <span class="refAuthor">Huang, Y.</span>, and <span class="refAuthor">M. Olson</span>, <span class="refTitle">"HyStart++: Modified Slow Start for TCP"</span>, <span class="seriesInfo">RFC 9406</span>, <span class="seriesInfo">DOI 10.17487/RFC9406</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9406">https://www.rfc-editor.org/rfc/rfc9406</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9438">[RFC9438]</dt>
       <dd>
