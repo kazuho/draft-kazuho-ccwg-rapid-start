@@ -66,10 +66,34 @@ congestion avoidance.
 
 This section describes the algorithm used by Rapid Start.
 
-## Rapid Start Phase
 
-When the path appears not to be building a queue, the sender uses a more
-aggressive startup increase than classic slow start.
+## Sending in the First Round Trip
+
+Rapid Start uses a more aggressive growth factor than classic slow start. When
+such growth is used, sending the initial congestion window as a short burst can
+make the sender observe a bottleneck overflow earlier than it would under evenly
+paced transmission. To ensure that Rapid Start observes the path's queueing
+behavior rather than sender-side burstiness, the sender SHOULD pace the packets
+over approximately one RTT when filling the connection's congestion window for
+the first time.
+
+One way to accomplish that is to use Careful Resume
+{{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}, which requires that all
+packets sent in its Unvalidated Phase be paced based on `current_rtt`,
+regardless of previous knowledge. For connections that have no prior knowledge
+of the path (i.e., no previously saved CC parameters applicable to the 4-tuple),
+the sender SHOULD limit the initial jump window (`jump_cwnd`) to at most
+`2 * IW`. With this bound, the required pacing rate
+(`pacing_rate = jump_cwnd / min_rtt`) does not exceed the pacing rate that would
+be used by classic slow start with pacing, so Rapid Start does not create a
+larger burst than existing paced startup.
+
+
+## Increasing the Congestion Window
+
+Similarly to Slow Start, Rapid Start increases the congestion window as packets
+are acknowledged. The difference is that when the path appears not to be
+building a queue, the sender uses a more aggressive startup increase.
 
 Whether the path is "not building a queue" is determined by comparing the floor
 RTT of the most recent round trip with the connection's minimum RTT.
@@ -95,28 +119,6 @@ defaults that provide tolerance for typical jitter while keeping Rapid Start out
 of the range where early queueing-detection algorithms such as HyStart++
 {{?RFC9406}} are known to trigger. Therefore, HyStart++ can be used in
 conjunction with Rapid Start.
-
-
-## Pacing Requirement
-
-Rapid Start uses a more aggressive growth factor than classic slow start. When
-such growth is used, sending the initial congestion window as a short burst can
-make the sender observe a bottleneck overflow earlier than it would under evenly
-paced transmission. To ensure that Rapid Start observes the path's queueing
-behavior rather than sender-side burstiness, the sender SHOULD pace the packets
-over approximately one RTT when filling the connection's congestion window for
-the first time.
-
-One way to accomplish that is to use Careful Resume
-{{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}, which requires that all
-packets sent in its Unvalidated Phase be paced based on `current_rtt`,
-regardless of previous knowledge. For connections that have no prior knowledge
-of the path (i.e., no previously saved CC parameters applicable to the 4-tuple),
-the sender SHOULD limit the initial jump window (`jump_cwnd`) to at most
-`2 * IW`. With this bound, the required pacing rate
-(`pacing_rate = jump_cwnd / min_rtt`) does not exceed the pacing rate that would
-be used by classic slow start with pacing, so Rapid Start does not create a
-larger burst than existing paced startup.
 
 
 ## Congestion Handling
