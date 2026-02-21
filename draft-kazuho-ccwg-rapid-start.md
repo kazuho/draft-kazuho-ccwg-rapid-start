@@ -77,16 +77,14 @@ behavior rather than sender-side burstiness, the sender SHOULD pace the packets
 over a full RTT, using the current RTT estimate, when sending the first window's
 worth of data.
 
-One way to accomplish that is to use Careful Resume
-{{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}, which requires that all
-packets sent in its Unvalidated Phase be paced based on `current_rtt`,
-regardless of previous knowledge. For connections that have no prior knowledge
-of the path (i.e., no previously saved CC parameters applicable to the 4-tuple),
-the sender SHOULD limit the initial jump window (`jump_cwnd`) to at most
-`2 * IW`. With this bound, the required pacing rate
-(`pacing_rate = jump_cwnd / min_rtt`) does not exceed the pacing rate that would
-be used by classic slow start with pacing, so Rapid Start does not create a
-larger burst than existing paced startup.
+When pacing over a full RTT, Rapid Start can use an initial window up to 2× that
+of classic slow start with pacing, because spreading the transmission over a
+full RTT (rather than half an RTT) yields a comparable pacing rate.
+
+A sender using Careful Resume {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}
+satisfies these recommendations, because it requires that all packets sent in
+its Unvalidated Phase be paced based on `current_rtt`, regardless of prior
+knowledge.
 
 
 ## Increasing the Congestion Window
