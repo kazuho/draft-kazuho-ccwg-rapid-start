@@ -4,8 +4,8 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                         4 November 2025
-Expires: 8 May 2026
+Intended status: Standards Track                        21 February 2026
+Expires: 25 August 2026
 
 
                   Rapid Startup of Congestion Control
@@ -47,11 +47,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 May 2026.
+   This Internet-Draft will expire on 25 August 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -72,6 +72,7 @@ Table of Contents
      3.2.  Pacing Requirement
      3.3.  Congestion Handling
        3.3.1.  Deriving the Reduction Factors
+       3.3.2.  Interaction with ECN
    4.  Limitations
    5.  Security Considerations
    6.  IANA Considerations
@@ -253,6 +254,45 @@ Table of Contents
    *  At the end of the recovery period, the congestion window becomes
       as large as the full BDP multiplied by beta, the same as at the
       end of the recovery period during the congestion avoidance phase.
+
+3.3.2.  Interaction with ECN
+
+   Section 3.3.1 provides the rationale for the recovery behavior in
+   terms of the full BDP (which, under loss-based detection, includes
+   filling the bottleneck queue up to the point it overflows and packets
+   are dropped).  However, when congestion happens on an ECN-capable
+   path, it can be reported via CE marks without requiring packet loss.
+   If Rapid Start enters a recovery period upon observing a CE mark but
+   no packets are lost, then it exits that recovery period with a
+   congestion window that is beta times its size upon entering recovery.
+
+   If the growth factor in the last round-trip was 3×, the congestion
+   window upon entering recovery can be larger than with 2×, and
+   therefore the congestion window at the end of recovery (beta times
+   the entry size) can also be larger.  This makes the next recovery
+   period start sooner, but otherwise does not change the flow's
+   behavior under ECN-signaled congestion pressure.
+
+   The other concern is buffer overflow before CE feedback is observed.
+   Under 3× growth, the sender might build up a bottleneck queue that is
+   twice as large as under 2× growth.  However, even in the extreme case
+   where a network’s buffering margin is tightly provisioned for a
+   target maximum RTT under conventional slow start (i.e., 2× growth),
+   this larger queue buildup under 3× growth simply halves the loss-free
+   RTT range: only connections with RTTs above half of that target
+   maximum would be affected.  In practice, networks do not generally
+   provision buffers that tightly; with ECN, they can signal congestion
+   without relying on drop, so leaving extra buffering margin typically
+   has little downside.  For these reasons, this overflow risk is
+   limited in practice.
+
+   On loss-based paths, a more aggressive startup increases the
+   likelihood of overflowing the bottleneck buffer and triggering packet
+   drops, which delays delivery to the application due to
+   retransmission.  In contrast, on ECN-capable paths, congestion is
+   typically signaled without relying on packet drops, so this loss-
+   induced delivery delay mode is largely avoided.  As a result, the
+   benefits of faster growth of the congestion window are more reliable.
 
 4.  Limitations
 
