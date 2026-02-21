@@ -126,7 +126,7 @@ this period is (1) to drain the queue and (2) after the more aggressive startup,
 to bring the congestion window back in line with the actual BDP of the path.
 
 When entering the recovery period, the sender scales the current congestion
-window by a silence factor. This momentarily stops transmission so that the
+window by a silence factor. This momentarily pauses transmission so that the
 bottleneck queue can drain by a controlled amount.
 
 ~~~pseudocode
@@ -162,8 +162,8 @@ cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
 ~~~
 
 because, if the losses are caused purely by tail drops at the bottleneck queue,
-the loss ratio is unlikely to exceed the reciprocal of the most aggressive
-growth factor.
+the loss ratio is unlikely to exceed `1 - 1 / G`, where `G` is the most
+aggressive growth factor.
 
 Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
