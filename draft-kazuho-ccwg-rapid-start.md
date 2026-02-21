@@ -126,7 +126,7 @@ this period is (1) to drain the queue and (2) after the more aggressive startup,
 to bring the congestion window back in line with the actual BDP of the path.
 
 When entering the recovery period, the sender scales the current congestion
-window by a silence factor. This momentarily stops transmission so that the
+window by a silence factor. This momentarily pauses transmission so that the
 bottleneck queue can drain by a controlled amount.
 
 ~~~pseudocode
