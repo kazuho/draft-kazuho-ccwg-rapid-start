@@ -56,15 +56,18 @@ These effects are particularly detrimental to short-lived flows, which may only
 have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.
 
-Rapid Start keeps this IW-based probing model but increases the congestion
-window by 3× per RTT while an RTT-sized observation window shows no queueing, so
-that the sender reaches the path BDP in fewer RTTs than with 2× slow start. Once
-queue buildup is observed in that window, Rapid Start stops using 3× growth and
-reverts to 2× growth. If actual congestion is signaled (for example, by packet
-loss or ECN), Rapid Start does not simply apply a fixed multiplicative decrease;
-instead it scales the window based on the amount of data that has passed the
-bottleneck in that round and then hands control over to normal recovery and
-congestion avoidance.
+Rapid Start retains the initial-window-based probing model but mitigates these
+issues. It paces the initial congestion window over the full estimated RTT,
+allowing an initial window up to 2× that of classic slow start at a comparable
+pacing rate. It then grows the congestion window by 3× per round-trip until
+queue buildup is observed, after which it reverts to classic 2× growth. When
+congestion is signaled, Rapid Start momentarily pauses transmission and then
+reduces the window gradually in proportion to delivered and lost bytes. Doing so
+avoids burstiness as well as mitigating the risk of the bottleneck buffer
+becoming empty and the path becoming underutilized during recovery. After
+recovery, control is handed over to ordinary congestion avoidance, such as that
+of NewReno ({{?RFC6582}}) and QUIC congestion control
+({{Section 7 of !RFC9002}}).
 
 
 # Conventions and Definitions
