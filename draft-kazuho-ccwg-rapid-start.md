@@ -24,11 +24,12 @@ informative:
 --- abstract
 
 This document defines Rapid Start, a congestion-control startup algorithm that
-grows the window by 3× per RTT until queue buildup is observed, so that a sender
-can reach the path BDP faster than with classic 2× slow start. When congestion
-is observed, Rapid Start immediately scales the window relative to the bytes
-that have passed through the bottleneck and then hands over to normal recovery
-and congestion avoidance.
+grows the congestion window by 3× per RTT until queue buildup is observed, so
+that a sender can reach the path BDP faster than with classic 2× slow start.
+When congestion is observed, Rapid Start gradually reduces the window in
+proportion to delivered and lost bytes, converging to the appropriate window
+size while avoiding bursts, before handing over to normal recovery and
+congestion avoidance.
 
 
 --- middle
@@ -158,12 +159,13 @@ the aggressive ramp-up.
 The sender SHOULD NOT reduce the congestion window below
 
 ~~~pseudocode
-cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+pre_recovery_cwnd * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
 ~~~
 
-because, if the losses are caused purely by tail drops at the bottleneck queue,
-the loss ratio is unlikely to exceed `1 - 1 / G`, where `G` is the most
-aggressive growth factor.
+where `pre_recovery_cwnd` is the congestion window immediately before entering
+the recovery period. This is because if the losses are caused purely by tail
+drops at the bottleneck queue, the loss ratio is unlikely to exceed `1 - 1 / G`,
+where `G` is the most aggressive growth factor.
 
 Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
@@ -219,8 +221,9 @@ of the full BDP (which, under loss-based detection, includes filling the
 bottleneck queue up to the point it overflows and packets are dropped). However,
 when congestion happens on an ECN-capable path, it can be reported via CE marks
 without requiring packet loss. If Rapid Start enters a recovery period upon
-observing a CE mark but no packets are lost, then it exits that recovery period
-with a congestion window that is beta times its size upon entering recovery.
+observing a CE mark but no packets are lost, then it exits recovery with a
+congestion window that is beta times its size immediately before entering
+recovery.
 
 If the growth factor in the last round-trip was 3×, the congestion window upon
 entering recovery can be larger than with 2×, and therefore the congestion
