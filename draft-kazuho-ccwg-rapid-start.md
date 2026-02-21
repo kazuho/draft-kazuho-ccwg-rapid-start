@@ -158,12 +158,13 @@ the aggressive ramp-up.
 The sender SHOULD NOT reduce the congestion window below
 
 ~~~pseudocode
-cwnd_before_loss * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+pre_recovery_cwnd * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
 ~~~
 
-because, if the losses are caused purely by tail drops at the bottleneck queue,
-the loss ratio is unlikely to exceed `1 - 1 / G`, where `G` is the most
-aggressive growth factor.
+where `pre_recovery_cwnd` is the congestion window immediately before entering
+the recovery period. This is because if the losses are caused purely by tail
+drops at the bottleneck queue, the loss ratio is unlikely to exceed `1 - 1 / G`,
+where `G` is the most aggressive growth factor.
 
 Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
