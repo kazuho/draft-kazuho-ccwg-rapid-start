@@ -102,8 +102,8 @@ Let:
 
 * `min_rtt` be the minimum RTT observed for the connection so far; and
 
-* `rtt_floor` be the minimum RTT sample observed during the last round trip
-  (i.e., within the most recent interval of length min_rtt).
+* `rtt_floor` be the minimum RTT sample observed during the most recent
+   `min_rtt` interval.
 
 If `rtt_floor` is no greater than `min(min_rtt + 4 ms, min_rtt * 1.10)`, the
 sender increases the congestion window (cwnd) by 2 bytes for every byte that is
