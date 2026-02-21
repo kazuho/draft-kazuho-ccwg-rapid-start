@@ -139,12 +139,13 @@ conjunction with Rapid Start.
 
 When Rapid Start observes the first packet loss or an explicit congestion
 signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
-this period is (1) to drain the queue and (2) after the more aggressive startup,
-to bring the congestion window back in line with the actual BDP of the path.
+this period is (1) to drain the queue and (2) to bring the congestion window
+back in line with the actual BDP of the path after the more aggressive startup.
 
 When entering the recovery period, the sender scales the current congestion
 window by a silence factor. This momentarily pauses transmission so that the
-bottleneck queue can drain by a controlled amount.
+bottleneck queue can be drained by a controlled amount, until bytes-in-flight is
+no greater than the scaled congestion window.
 
 ~~~pseudocode
 cwnd *= silence_factor
@@ -165,11 +166,11 @@ sender reduces the congestion window in proportion to the amount of data lost:
 cwnd -= loss_factor * bytes_newly_lost
 ~~~
 
-This approach ensures that, by the end of the recovery period,  the congestion
+This approach ensures that, by the end of the recovery period, the congestion
 window becomes a fraction of the full BDP (the sum of the idle BDP and the
 bottleneck queue size), while keeping the silence period short enough that the
 sender is likely to resume transmission before the bottleneck is fully drained,
-even if the congestion window had to be reduced significantly to compensate for
+even when the congestion window must be reduced significantly to compensate for
 the aggressive ramp-up.
 
 The sender SHOULD NOT reduce the congestion window below
