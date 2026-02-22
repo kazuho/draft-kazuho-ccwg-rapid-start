@@ -142,36 +142,29 @@ signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
 this period is (1) to drain the queue and (2) to bring the congestion window
 back in line with the actual BDP of the path after the more aggressive startup.
 
-When entering the recovery period, the sender scales the current congestion
-window by a silence factor. This momentarily pauses transmission so that the
-bottleneck queue can be drained by a controlled amount, until bytes-in-flight is
-no greater than the scaled congestion window.
+When entering the recovery period, the sender reduces the current congestion
+window by a small silence factor. This momentarily pauses transmission until
+bytes-in-flight is no greater than the reduced congestion window, allowing the
+bottleneck queue to be drained by a controlled amount.
 
 ~~~pseudocode
 cwnd *= silence_factor
 ~~~
 
-During the recovery period, whenever new data is acknowledged, the sender
-reduces the congestion window in proportion to the amount that has been newly
-acknowledged:
+During the recovery period, the sender reduces the congestion window in
+proportion to the amount that has been newly acknowledged or lost:
 
 ~~~pseudocode
 cwnd -= ack_factor * bytes_newly_acked
-~~~
-
-Likewise, whenever packet loss is confirmed during the recovery period, the
-sender reduces the congestion window in proportion to the amount of data lost:
-
-~~~pseudocode
 cwnd -= loss_factor * bytes_newly_lost
 ~~~
 
-This approach ensures that, by the end of the recovery period, the congestion
+This approach ensures that, upon exiting the recovery period, the congestion
 window becomes a fraction of the full BDP (the sum of the idle BDP and the
-bottleneck queue size), while keeping the silence period short enough that the
-sender is likely to resume transmission before the bottleneck is fully drained,
-even when the congestion window must be reduced significantly to compensate for
-the aggressive ramp-up.
+bottleneck queue size). At the same time, it keeps the silence period short
+enough that the sender is likely to resume transmission before the bottleneck is
+fully drained, even when the congestion window must be reduced significantly to
+compensate for the aggressive ramp-up.
 
 The sender SHOULD NOT reduce the congestion window below
 
