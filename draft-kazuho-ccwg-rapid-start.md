@@ -286,10 +286,26 @@ This document has no IANA actions.
 # Acknowledgments
 {:numbered="false"}
 
+Rapid Start combines three ideas: (1) pacing the initial window over a full RTT,
+(2) a more aggressive startup increase when queue buildup is not observed, and
+(3) a recovery behavior that smoothly converges the congestion window.
+
+Careful Resume {{CAREFUL-RESUME}} provides a predecessor for (1): it paces an
+initial window over a full RTT (based on a current RTT estimate) to avoid bursts
+when (re)starting. Rapid Start applies the same full-RTT pacing principle during
+starting.
+
 "SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
-al.) advocates a similar approach built on top of HyStart that increases the
-congestion window by up to 4× per round-trip based on ACK dispersal and RTT.
-Compared to SUSS, Rapid Start, relying solely on RTT, is simpler and allows
-reuse of existing mechanisms and specifications such as pacing, HyStart++, and
-Careful Resume. Rapid Start also specifies how the congestion window should be
-decreased upon congestion, allowing a smooth transition to congestion avoidance.
+al.) advocates a similar approach for (2), built on top of HyStart that
+increases the congestion window by up to 4× per round-trip based on ACK
+dispersal and RTT.
+
+Compared to SUSS, Rapid Start bases the (2) decision solely on RTT-based queue
+buildup detection, making it easier to integrate with other mechanisms and
+specifications such as HyStart++ {{RFC9406}}.
+
+For (3), Proportional Rate Reduction {{?RFC9937}} is related work in that it
+regulates sending during recovery to avoid bursts and underutilization. Rapid
+Start differs by defining a startup-specific recovery behavior, allowing the
+congestion window to smoothly converge before handing over to congestion
+avoidance.
