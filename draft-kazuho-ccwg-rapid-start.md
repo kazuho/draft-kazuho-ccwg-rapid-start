@@ -114,8 +114,11 @@ Let:
 
 * `min_rtt` be the minimum RTT observed for the connection so far;
 
-* `rtt_floor` be the minimum RTT sample observed during the most recent
-   `min_rtt` interval; and
+* `rtt_floor` be the smallest RTT sample observed over a recent observation
+  window of approximately one round-trip. For example, an implementation might
+  use a sliding time window of length `min_rtt`, or simply use
+  `currentRoundMinRTT` tracked for sequence-based rounds in HyStart++
+  {{?RFC9406}}); and
 
 * `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`.
 
@@ -132,8 +135,8 @@ The additive term (+4 ms) and the multiplicative term (×1.10) of
 `queue_buildup_thresh` are RECOMMENDED defaults that provide tolerance for
 typical jitter while keeping Rapid Start's aggressive growth out of the RTT
 inflation range where early queueing-detection algorithms such as HyStart++
-{{?RFC9406}} are known to trigger. Therefore, HyStart++ can be used in
-conjunction with Rapid Start.
+are known to trigger. Therefore, HyStart++ can be used in conjunction with
+Rapid Start.
 
 
 ## Congestion Handling
