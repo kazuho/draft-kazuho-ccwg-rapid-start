@@ -169,13 +169,13 @@ Table of Contents
 
    Let:
 
-   *  min_rtt be the minimum RTT observed for the connection so far;
+   *  min_rtt be the minimum RTT for the connection so far;
 
-   *  rtt_floor be the smallest RTT sample observed over a recent
-      observation window of approximately one round-trip.  For example,
-      an implementation might use a sliding time window of length
-      min_rtt, or simply use currentRoundMinRTT tracked for sequence-
-      based rounds in HyStart++ [RFC9406]); and
+   *  rtt_floor be the smallest RTT over a recent observation window of
+      approximately one round-trip.  For example, an implementation
+      might use a sliding time window of length min_rtt, or simply use
+      currentRoundMinRTT tracked for sequence-based rounds in HyStart++
+      [RFC9406]; and
 
    *  queue_buildup_thresh be min(min_rtt + 4 ms, min_rtt * 1.10).
 

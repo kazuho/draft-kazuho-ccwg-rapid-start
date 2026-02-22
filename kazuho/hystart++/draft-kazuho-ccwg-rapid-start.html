@@ -1309,14 +1309,13 @@ minimum RTT (<code>rtt_floor</code>) against a calculated threshold
 <p id="section-3.2-3">Let:<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2-4.1">
-            <p id="section-3.2-4.1.1"><code>min_rtt</code> be the minimum RTT observed for the connection so far;<a href="#section-3.2-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-3.2-4.1.1"><code>min_rtt</code> be the minimum RTT for the connection so far;<a href="#section-3.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.2-4.2">
-            <p id="section-3.2-4.2.1"><code>rtt_floor</code> be the smallest RTT sample observed over a recent observation
-window of approximately one round-trip. For example, an implementation might
-use a sliding time window of length <code>min_rtt</code>, or simply use
-<code>currentRoundMinRTT</code> tracked for sequence-based rounds in HyStart++
-<span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span>); and<a href="#section-3.2-4.2.1" class="pilcrow">¶</a></p>
+            <p id="section-3.2-4.2.1"><code>rtt_floor</code> be the smallest RTT over a recent observation window of
+ approximately one round-trip. For example, an implementation might use a
+ sliding time window of length <code>min_rtt</code>, or simply use <code>currentRoundMinRTT</code>
+ tracked for sequence-based rounds in HyStart++ <span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span>; and<a href="#section-3.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.2-4.3">
             <p id="section-3.2-4.3.1"><code>queue_buildup_thresh</code> be <code>min(min_rtt + 4 ms, min_rtt * 1.10)</code>.<a href="#section-3.2-4.3.1" class="pilcrow">¶</a></p>
