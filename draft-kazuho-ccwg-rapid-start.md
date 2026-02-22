@@ -24,11 +24,11 @@ informative:
 --- abstract
 
 This document defines Rapid Start, a congestion-control startup algorithm. It
-paces the transmission of the initial congestion window over a full RTT,
-allowing an initial window up to 2× that of classic slow start with pacing at a
-comparable pacing rate. It then grows the window by 3× per RTT until queue build
-up is observed, after which it reverts to classic 2× slow start growth. When
-congestion is signaled, Rapid Start smoothly converges the window based on
+starts by pacing the transmission of the initial congestion window over a full
+RTT, allowing an initial window up to 2× that of classic slow start with pacing
+at a comparable pacing rate. It then grows the window by 3× per RTT until queue
+buildup is observed, after which it reverts to classic 2× slow start growth.
+When congestion is signaled, Rapid Start smoothly converges the window based on
 delivered data, avoiding bursts and underutilization, before handing over to
 ordinary congestion avoidance.
 
