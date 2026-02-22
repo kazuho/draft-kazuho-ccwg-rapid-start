@@ -193,6 +193,10 @@ window multiplied by the window decrease factor. This allows the sender to keep
 the congestion window at least as large as classic slow start on paths with very
 small BDPs when transitioning to congestion avoidance.
 
+Upon exiting the first recovery period, Rapid Start ends; thereafter, the
+congestion window is governed by the underlying congestion controller's ordinary
+rules.
+
 
 ### Deriving the Reduction Factors {#reduction-factors}
 
