@@ -140,10 +140,11 @@ Rapid Start.
 
 ## Congestion Handling
 
-When Rapid Start observes the first packet loss or an explicit congestion
-signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
-this period is (1) to drain the queue and (2) to bring the congestion window
-back in line with the actual BDP of the path after the more aggressive startup.
+When Rapid Start observes the first packet loss or an explicit congestion signal
+(e.g., ECN-CE), the sender enters the first recovery period (TCP:
+{{Section 3.2 of RFC5681}}; QUIC: {{Section 7.3.2 of RFC9002}}), but adjusts the
+congestion window in an alternative manner to smoothly converge after the more
+aggressive startup.
 
 When entering the recovery period, the sender slightly scales down the current
 congestion window using a silence factor. This momentarily pauses transmission
