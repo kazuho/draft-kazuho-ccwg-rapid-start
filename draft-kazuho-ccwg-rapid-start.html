@@ -1546,8 +1546,12 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
 <span class="refAuthor">Balasubramanian, P.</span>, <span class="refAuthor">Huang, Y.</span>, and <span class="refAuthor">M. Olson</span>, <span class="refTitle">"HyStart++: Modified Slow Start for TCP"</span>, <span class="seriesInfo">RFC 9406</span>, <span class="seriesInfo">DOI 10.17487/RFC9406</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9406">https://www.rfc-editor.org/rfc/rfc9406</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9438">[RFC9438]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Xu, L.</span>, <span class="refAuthor">Ha, S.</span>, <span class="refAuthor">Rhee, I.</span>, <span class="refAuthor">Goel, V.</span>, and <span class="refAuthor">L. Eggert, Ed.</span>, <span class="refTitle">"CUBIC for Fast and Long-Distance Networks"</span>, <span class="seriesInfo">RFC 9438</span>, <span class="seriesInfo">DOI 10.17487/RFC9438</span>, <time datetime="2023-08" class="refDate">August 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9438">https://www.rfc-editor.org/rfc/rfc9438</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9937">[RFC9937]</dt>
+      <dd>
+<span class="refAuthor">Mathis, M.</span>, <span class="refAuthor">Cardwell, N.</span>, <span class="refAuthor">Cheng, Y.</span>, and <span class="refAuthor">N. Dukkipati</span>, <span class="refTitle">"Proportional Rate Reduction (PRR)"</span>, <span class="seriesInfo">RFC 9937</span>, <span class="seriesInfo">DOI 10.17487/RFC9937</span>, <time datetime="2025-12" class="refDate">December 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9937">https://www.rfc-editor.org/rfc/rfc9937</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -1559,13 +1563,25 @@ criterion. However, with TCP, there can be issues producing a reliable estimate.
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
-al.) advocates a similar approach built on top of HyStart that increases the
-congestion window by up to 4× per round-trip based on ACK dispersal and RTT.
-Compared to SUSS, Rapid Start, relying solely on RTT, is simpler and allows
-reuse of existing mechanisms and specifications such as pacing, HyStart++, and
-Careful Resume. Rapid Start also specifies how the congestion window should be
-decreased upon congestion, allowing a smooth transition to congestion avoidance.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">Rapid Start combines three ideas: (1) pacing the initial window over a full RTT,
+(2) a more aggressive startup increase when queue buildup is not observed, and
+(3) a recovery behavior that smoothly converges the congestion window.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a predecessor for (1): it paces an
+initial window over a full RTT (based on a current RTT estimate) to avoid bursts
+when (re)starting. Rapid Start applies the same full-RTT pacing principle during
+starting.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
+al.) advocates a similar approach for (2), built on top of HyStart that
+increases the congestion window by up to 4× per round-trip based on ACK
+dispersal and RTT.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<p id="appendix-A-4">Compared to SUSS, Rapid Start bases the (2) decision solely on RTT-based queue
+buildup detection, making it easier to integrate with other mechanisms and
+specifications such as HyStart++ <span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span>.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<p id="appendix-A-5">For (3), Proportional Rate Reduction <span>[<a href="#RFC9937" class="cite xref">RFC9937</a>]</span> is related work in that it
+regulates sending during recovery to avoid bursts and underutilization. Rapid
+Start differs by defining a startup-specific recovery behavior, allowing the
+congestion window to smoothly converge before handing over to congestion
+avoidance.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
