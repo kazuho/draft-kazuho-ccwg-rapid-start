@@ -147,9 +147,10 @@ congestion window in an alternative manner to smoothly converge after the more
 aggressive startup.
 
 When entering the recovery period, the sender slightly scales down the current
-congestion window using a silence factor. This momentarily pauses transmission
-until bytes-in-flight is no greater than the reduced congestion window, allowing
-the bottleneck queue to be drained by a controlled amount.
+congestion window using a silence factor. As a result of this reduction,
+sending is momentarily blocked until bytes-in-flight is no greater than the
+reduced congestion window, allowing the bottleneck queue to be drained by a
+controlled amount.
 
 ~~~pseudocode
 cwnd *= silence_factor
