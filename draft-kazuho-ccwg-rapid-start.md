@@ -189,7 +189,7 @@ to congestion avoidance.
 ### Deriving the Reduction Factors {#reduction-factors}
 
 The reduction factors are constants derived from the multiplicative window
-decrease factor (beta), which is used in the congestion avoidance phase. The
+decrease factor (denoted beta) used by the congestion avoidance algorithm. The
 factors are calculated as:
 
 ~~~pseudocode
@@ -218,10 +218,12 @@ loss_factor     = 53/60
 The formula guarantees the following properties:
 
 * When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
-  relative to the full BDP, the same as during the congestion avoidance phase.
-* At the end of the recovery period, the congestion window becomes as large as
-  the full BDP multiplied by beta, the same as at the end of the recovery period
-  during the congestion avoidance phase.
+  as a fraction of the full BDP, the same as during the congestion avoidance
+  phase.
+* Upon exiting the recovery period, the congestion window becomes the full BDP
+  multiplied by beta, the same as during the congestion avoidance phase. This
+  holds independent of the loss ratio during the recovery period, unless limited
+  by the bounds described in {{congestion-handling}}.
 
 
 ### Interaction with ECN
