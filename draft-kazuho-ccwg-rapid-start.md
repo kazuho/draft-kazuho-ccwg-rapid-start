@@ -229,9 +229,9 @@ The formula guarantees the following properties:
 ### Interaction with ECN
 
 {{reduction-factors}} provides the rationale for the recovery behavior in terms
-of the full BDP (which, under loss-based detection, includes filling the
-bottleneck queue up to the point it overflows and packets are dropped). However,
-when congestion happens on an ECN-capable path, it can be reported via CE marks
+of the full BDP (which, under loss-based detection, is estimated by probing
+until the bottleneck queue overflows and packets are dropped). However, when
+congestion happens on an ECN-capable path, it can be reported via CE marks
 without requiring packet loss. If Rapid Start enters a recovery period upon
 observing a CE mark but no packets are lost, then it exits recovery with a
 congestion window that is beta times its size immediately before entering
@@ -258,8 +258,8 @@ On loss-based paths, a more aggressive startup increases the likelihood of
 overflowing the bottleneck buffer and triggering packet drops, which delays
 delivery to the application due to retransmission. In contrast, on ECN-capable
 paths, congestion is typically signaled without relying on packet drops, so this
-loss-induced delivery delay mode is largely avoided. As a result, the benefits
-of faster growth of the congestion window are more reliable.
+loss-induced delivery delay mode is largely avoided. The benefits of faster
+growth of the congestion window are thus more reliable.
 
 
 # Limitations
