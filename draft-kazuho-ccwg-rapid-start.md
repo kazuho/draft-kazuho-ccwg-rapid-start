@@ -106,28 +106,31 @@ Similarly to Slow Start, Rapid Start increases the congestion window as packets
 are acknowledged. The difference is that when the path appears not to be
 building a queue, the sender uses a more aggressive startup increase.
 
-Whether the path is "not building a queue" is determined by comparing the floor
-RTT of the most recent round trip with the connection's minimum RTT.
+Whether the path appears not to be building a queue is determined by comparing
+`rtt_floor` against `queue_buildup_thresh`.
 
 Let:
 
-* `min_rtt` be the minimum RTT observed for the connection so far; and
+* `min_rtt` be the minimum RTT observed for the connection so far;
 
 * `rtt_floor` be the minimum RTT sample observed during the most recent
-   `min_rtt` interval.
+   `min_rtt` interval; and
 
-If `rtt_floor` is no greater than `min(min_rtt + 4 ms, min_rtt * 1.10)`, the
-sender increases the congestion window (cwnd) by 2 bytes for every byte that is
-newly acknowledged, which results in a 3× growth of cwnd per round-trip time.
+* `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`.
 
-If `rtt_floor` is greater than this threshold, the sender SHOULD increase the
-congestion window as classic slow start does; i.e., by 1 byte for every byte
-that is newly acknowledged, which results in a 2× growth of cwnd per round-trip
-time.
+If `rtt_floor` is no greater than `queue_buildup_thresh`, the sender increases
+the congestion window (cwnd) by 2 bytes for every byte that is newly
+acknowledged, which results in a 3× growth of cwnd per round-trip.
 
-The additive term (+4 ms) and the multiplicative term (×1.10) are RECOMMENDED
-defaults that provide tolerance for typical jitter while keeping Rapid Start out
-of the range where early queueing-detection algorithms such as HyStart++
+If `rtt_floor` is greater than `queue_buildup_thresh`, the sender SHOULD
+increase the congestion window as in classic slow start; i.e., by 1 byte for
+every byte that is newly acknowledged, which results in a 2× growth of cwnd per
+round-trip.
+
+The additive term (+4 ms) and the multiplicative term (×1.10) of
+`queue_buildup_thresh` are RECOMMENDED defaults that provide tolerance for
+typical jitter while keeping Rapid Start's aggressive growth out of the RTT
+inflation range where early queueing-detection algorithms such as HyStart++
 {{?RFC9406}} are known to trigger. Therefore, HyStart++ can be used in
 conjunction with Rapid Start.
 
@@ -136,38 +139,32 @@ conjunction with Rapid Start.
 
 When Rapid Start observes the first packet loss or an explicit congestion
 signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
-this period is (1) to drain the queue and (2) after the more aggressive startup,
-to bring the congestion window back in line with the actual BDP of the path.
+this period is (1) to drain the queue and (2) to bring the congestion window
+back in line with the actual BDP of the path after the more aggressive startup.
 
-When entering the recovery period, the sender scales the current congestion
-window by a silence factor. This momentarily pauses transmission so that the
-bottleneck queue can drain by a controlled amount.
+When entering the recovery period, the sender reduces the current congestion
+window by a small silence factor. This momentarily pauses transmission until
+bytes-in-flight is no greater than the reduced congestion window, allowing the
+bottleneck queue to be drained by a controlled amount.
 
 ~~~pseudocode
 cwnd *= silence_factor
 ~~~
 
-During the recovery period, whenever new data is acknowledged, the sender
-reduces the congestion window in proportion to the amount that has been newly
-acknowledged:
+During the recovery period, the sender reduces the congestion window in
+proportion to the amount that has been newly acknowledged or lost:
 
 ~~~pseudocode
 cwnd -= ack_factor * bytes_newly_acked
-~~~
-
-Likewise, whenever packet loss is confirmed during the recovery period, the
-sender reduces the congestion window in proportion to the amount of data lost:
-
-~~~pseudocode
 cwnd -= loss_factor * bytes_newly_lost
 ~~~
 
-This approach ensures that, by the end of the recovery period,  the congestion
+This approach ensures that, upon exiting the recovery period, the congestion
 window becomes a fraction of the full BDP (the sum of the idle BDP and the
-bottleneck queue size), while keeping the silence period short enough that the
-sender is likely to resume transmission before the bottleneck is fully drained,
-even if the congestion window had to be reduced significantly to compensate for
-the aggressive ramp-up.
+bottleneck queue size). At the same time, it keeps the silence period short
+enough that the sender is likely to resume transmission before the bottleneck is
+fully drained, even when the congestion window must be reduced significantly to
+compensate for the aggressive ramp-up.
 
 The sender SHOULD NOT reduce the congestion window below
 
@@ -192,7 +189,7 @@ to congestion avoidance.
 ### Deriving the Reduction Factors {#reduction-factors}
 
 The reduction factors are constants derived from the multiplicative window
-decrease factor (beta), which is used in the congestion avoidance phase. The
+decrease factor (denoted beta) used by the congestion avoidance algorithm. The
 factors are calculated as:
 
 ~~~pseudocode
@@ -221,18 +218,20 @@ loss_factor     = 53/60
 The formula guarantees the following properties:
 
 * When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
-  relative to the full BDP, the same as during the congestion avoidance phase.
-* At the end of the recovery period, the congestion window becomes as large as
-  the full BDP multiplied by beta, the same as at the end of the recovery period
-  during the congestion avoidance phase.
+  as a fraction of the full BDP, the same as during the congestion avoidance
+  phase.
+* Upon exiting the recovery period, the congestion window becomes the full BDP
+  multiplied by beta, the same as during the congestion avoidance phase. This
+  holds independent of the loss ratio during the recovery period, unless limited
+  by the bounds described in {{congestion-handling}}.
 
 
 ### Interaction with ECN
 
 {{reduction-factors}} provides the rationale for the recovery behavior in terms
-of the full BDP (which, under loss-based detection, includes filling the
-bottleneck queue up to the point it overflows and packets are dropped). However,
-when congestion happens on an ECN-capable path, it can be reported via CE marks
+of the full BDP (which, under loss-based detection, is estimated by probing
+until the bottleneck queue overflows and packets are dropped). However, when
+congestion happens on an ECN-capable path, it can be reported via CE marks
 without requiring packet loss. If Rapid Start enters a recovery period upon
 observing a CE mark but no packets are lost, then it exits recovery with a
 congestion window that is beta times its size immediately before entering
@@ -259,14 +258,14 @@ On loss-based paths, a more aggressive startup increases the likelihood of
 overflowing the bottleneck buffer and triggering packet drops, which delays
 delivery to the application due to retransmission. In contrast, on ECN-capable
 paths, congestion is typically signaled without relying on packet drops, so this
-loss-induced delivery delay mode is largely avoided. As a result, the benefits
-of faster growth of the congestion window are more reliable.
+loss-induced delivery delay mode is largely avoided. The benefits of faster
+growth of the congestion window are thus more reliable.
 
 
 # Limitations
 
 To estimate the BDP during the first recovery period, Rapid Start depends on the
-transport protocol's accurately and promptly reporting the traversal of each
+transport protocol accurately and promptly reporting the delivery status of each
 sent packet, even when the packet loss ratio is high. QUIC, with its explicit
 packet numbers and ACK frames capable of reporting many gaps, meets this
 criterion. However, with TCP, there can be issues producing a reliable estimate.
