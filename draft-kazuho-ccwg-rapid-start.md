@@ -25,8 +25,8 @@ informative:
 
 This document defines Rapid Start, a congestion-control startup algorithm. It
 starts by pacing the transmission of the initial congestion window over a full
-RTT, allowing an initial window up to 2× that of classic slow start with pacing
-at a comparable pacing rate. It then grows the window by 3× per RTT until queue
+RTT, allowing an initial window up to 2× that of classic paced slow start at a
+comparable sending rate. It then grows the window by 3× per RTT until queue
 buildup is observed, after which it reverts to classic 2× slow start growth.
 When congestion is signaled, Rapid Start smoothly converges the window based on
 delivered data, avoiding bursts and underutilization, before handing over to
@@ -106,8 +106,9 @@ Similarly to Slow Start, Rapid Start increases the congestion window as packets
 are acknowledged. The difference is that when the path appears not to be
 building a queue, the sender uses a more aggressive startup increase.
 
-Whether the path appears not to be building a queue is determined by comparing
-`rtt_floor` against `queue_buildup_thresh`.
+The sender determines if the path is building a queue by comparing the recent
+minimum RTT (`rtt_floor`) against a calculated threshold
+(`queue_buildup_thresh`).
 
 Let:
 
@@ -142,10 +143,10 @@ signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
 this period is (1) to drain the queue and (2) to bring the congestion window
 back in line with the actual BDP of the path after the more aggressive startup.
 
-When entering the recovery period, the sender reduces the current congestion
-window by a small silence factor. This momentarily pauses transmission until
-bytes-in-flight is no greater than the reduced congestion window, allowing the
-bottleneck queue to be drained by a controlled amount.
+When entering the recovery period, the sender slightly scales down the current
+congestion window using a silence factor. This momentarily pauses transmission
+until bytes-in-flight is no greater than the reduced congestion window, allowing
+the bottleneck queue to be drained by a controlled amount.
 
 ~~~pseudocode
 cwnd *= silence_factor
@@ -232,10 +233,9 @@ The formula guarantees the following properties:
 of the full BDP (which, under loss-based detection, is estimated by probing
 until the bottleneck queue overflows and packets are dropped). However, when
 congestion happens on an ECN-capable path, it can be reported via CE marks
-without requiring packet loss. If Rapid Start enters a recovery period upon
-observing a CE mark but no packets are lost, then it exits recovery with a
-congestion window that is beta times its size immediately before entering
-recovery.
+without requiring packet loss. If Rapid Start enters a recovery period due to a
+CE mark but no packets are lost, then it exits recovery with a congestion window
+that is beta times its size immediately before entering recovery.
 
 If the growth factor in the last round-trip was 3×, the congestion window upon
 entering recovery can be larger than with 2×, and therefore the congestion
