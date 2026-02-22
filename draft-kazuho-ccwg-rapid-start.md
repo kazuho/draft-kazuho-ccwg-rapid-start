@@ -185,9 +185,9 @@ Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
 
 The sender MAY stop reducing the congestion window once it reaches the initial
-window multiplied by the window decrease factor. Doing so preserves classic slow
-start's aggressiveness on connections with tiny BDPs as the sender transitions
-to congestion avoidance.
+window multiplied by the window decrease factor. This allows the sender to keep
+the congestion window at least as large as classic slow start on paths with very
+small BDPs when transitioning to congestion avoidance.
 
 
 ### Deriving the Reduction Factors {#reduction-factors}
