@@ -265,7 +265,7 @@ growth of the congestion window are thus more reliable.
 # Limitations
 
 To estimate the BDP during the first recovery period, Rapid Start depends on the
-transport protocol's accurately and promptly reporting the traversal of each
+transport protocol accurately and promptly reporting the delivery status of each
 sent packet, even when the packet loss ratio is high. QUIC, with its explicit
 packet numbers and ACK frames capable of reporting many gaps, meets this
 criterion. However, with TCP, there can be issues producing a reliable estimate.
