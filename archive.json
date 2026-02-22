@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-19T00:32:38.946786+00:00",
+  "timestamp": "2026-02-22T00:31:11.186965+00:00",
   "repo": "kazuho/draft-kazuho-ccwg-rapid-start",
   "labels": [
     {
@@ -50,5 +50,118 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOQNz9Nc7FTnXE",
+      "title": "clarify the behavior on ECN paths",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/1",
+      "state": "MERGED",
+      "author": "kazuho",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-02-21T05:00:22Z",
+      "updatedAt": "2026-02-21T05:13:09Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "3d0bd41b89091bcd9c5d94941bf660309f613b70",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "kazuho/ecn-interaction",
+      "headRefOid": "6db80aab601f58fa488fd05efd6ee1d4c61fb7d9",
+      "closedAt": "2026-02-21T05:13:09Z",
+      "mergedAt": "2026-02-21T05:13:08Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "0c94507bd5fa9ac82af9fb840d134ceaf3b070b6"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOQNz9Nc7FT6wK",
+      "title": "fixes to S3.3",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/2",
+      "state": "MERGED",
+      "author": "kazuho",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-02-21T06:10:37Z",
+      "updatedAt": "2026-02-21T06:11:18Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "0c94507bd5fa9ac82af9fb840d134ceaf3b070b6",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "kazuho/3_3_fix",
+      "headRefOid": "ae878d787944a38328f7f6854a622df428e53d62",
+      "closedAt": "2026-02-21T06:11:18Z",
+      "mergedAt": "2026-02-21T06:11:18Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "acc1d28ad748a185a4a3e93ce496c252227a89a7"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOQNz9Nc7FUQLe",
+      "title": "chagpt reviews",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/3",
+      "state": "MERGED",
+      "author": "kazuho",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-02-21T07:06:35Z",
+      "updatedAt": "2026-02-21T07:18:15Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "acc1d28ad748a185a4a3e93ce496c252227a89a7",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "kazuho/chatgpt",
+      "headRefOid": "e8cfa943ccbe1e6b01f740eda21c9db072373a82",
+      "closedAt": "2026-02-21T07:18:15Z",
+      "mergedAt": "2026-02-21T07:18:15Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "2db66f5329f9da470f655d9af14e363037e9cdc3"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOQNz9Nc7FWUTY",
+      "title": "reorganize and clarify the 3 design decisions",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/4",
+      "state": "MERGED",
+      "author": "kazuho",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Reorganizes the document and clarifies the 3 design decisions:\r\n* start pacing for the full RTT estimate (rather than 1/2)\r\n* use 3x\r\n* smooth reduction of CWND proportional to delivered bytes.",
+      "createdAt": "2026-02-21T15:29:13Z",
+      "updatedAt": "2026-02-21T15:29:22Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "2db66f5329f9da470f655d9af14e363037e9cdc3",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "kazuho/timeline",
+      "headRefOid": "ef1b6c8d5bfcfc429290508cd8fb3c221c860b8c",
+      "closedAt": "2026-02-21T15:29:21Z",
+      "mergedAt": "2026-02-21T15:29:21Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "8494473ee6c8e46a163cd73beaf776506b327fa1"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
