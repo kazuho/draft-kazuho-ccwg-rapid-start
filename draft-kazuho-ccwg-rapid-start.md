@@ -102,9 +102,9 @@ knowledge.
 
 ## Increasing the Congestion Window
 
-Similarly to Slow Start, Rapid Start increases the congestion window as packets
-are acknowledged. The difference is that when the path appears not to be
-building a queue, the sender uses a more aggressive startup increase.
+Like Slow Start, Rapid Start increases the congestion window as packets are
+acknowledged. The difference is that when the path appears not to be building a
+queue, the sender uses a more aggressive startup increase.
 
 The sender determines if the path is building a queue by comparing the recent
 minimum RTT (`rtt_floor`) against a calculated threshold
