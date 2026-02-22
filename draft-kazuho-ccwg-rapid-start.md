@@ -102,9 +102,9 @@ knowledge.
 
 ## Increasing the Congestion Window
 
-Similarly to Slow Start, Rapid Start increases the congestion window as packets
-are acknowledged. The difference is that when the path appears not to be
-building a queue, the sender uses a more aggressive startup increase.
+Like Slow Start, Rapid Start increases the congestion window as packets are
+acknowledged. The difference is that when the path appears not to be building a
+queue, the sender uses a more aggressive startup increase.
 
 The sender determines if the path is building a queue by comparing the recent
 minimum RTT (`rtt_floor`) against a calculated threshold
@@ -119,7 +119,9 @@ Let:
    sliding time window of length `min_rtt`, or simply use `currentRoundMinRTT`
    tracked for sequence-based rounds in HyStart++ {{?RFC9406}}; and
 
-* `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`.
+* `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`, where the
+   additive term (+4 ms) and the multiplicative term (×1.10) are RECOMMENDED
+   defaults.
 
 If `rtt_floor` is no greater than `queue_buildup_thresh`, the sender increases
 the congestion window (cwnd) by 2 bytes for every byte that is newly
@@ -130,25 +132,27 @@ increase the congestion window as in classic slow start; i.e., by 1 byte for
 every byte that is newly acknowledged, which results in a 2× growth of cwnd per
 round-trip.
 
-The additive term (+4 ms) and the multiplicative term (×1.10) of
-`queue_buildup_thresh` are RECOMMENDED defaults that provide tolerance for
-typical jitter while keeping Rapid Start's aggressive growth out of the RTT
-inflation range where early queueing-detection algorithms such as HyStart++
-are known to trigger. Therefore, HyStart++ can be used in conjunction with
+The construction of `queue_buildup_thresh` follows HyStart++'s bounded
+RTT-inflation approach, but uses a tighter RECOMMENDED threshold because the
+threshold is used to enable a more aggressive startup increase when queue
+buildup is unlikely, whereas HyStart++ uses RTT inflation to reduce growth by
+exiting slow start. Consequently, HyStart++ can be used in conjunction with
 Rapid Start.
 
 
 ## Congestion Handling
 
-When Rapid Start observes the first packet loss or an explicit congestion
-signal (e.g., ECN-CE), the sender enters the recovery period. The purpose of
-this period is (1) to drain the queue and (2) to bring the congestion window
-back in line with the actual BDP of the path after the more aggressive startup.
+When Rapid Start observes the first packet loss or an explicit congestion signal
+(e.g., ECN-CE), the sender enters the first recovery period (TCP:
+{{Section 3.2 of RFC5681}}; QUIC: {{Section 7.3.2 of RFC9002}}), but adjusts the
+congestion window in an alternative manner to smoothly converge after the more
+aggressive startup.
 
 When entering the recovery period, the sender slightly scales down the current
-congestion window using a silence factor. This momentarily pauses transmission
-until bytes-in-flight is no greater than the reduced congestion window, allowing
-the bottleneck queue to be drained by a controlled amount.
+congestion window using a silence factor. As a result of this reduction,
+sending is momentarily blocked until bytes-in-flight is no greater than the
+reduced congestion window, allowing the bottleneck queue to be drained by a
+controlled amount.
 
 ~~~pseudocode
 cwnd *= silence_factor
@@ -184,9 +188,9 @@ Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
 
 The sender MAY stop reducing the congestion window once it reaches the initial
-window multiplied by the window decrease factor. Doing so preserves classic slow
-start's aggressiveness on connections with tiny BDPs as the sender transitions
-to congestion avoidance.
+window multiplied by the window decrease factor. This allows the sender to keep
+the congestion window at least as large as classic slow start on paths with very
+small BDPs when transitioning to congestion avoidance.
 
 
 ### Deriving the Reduction Factors {#reduction-factors}
