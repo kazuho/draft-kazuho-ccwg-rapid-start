@@ -119,7 +119,9 @@ Let:
    sliding time window of length `min_rtt`, or simply use `currentRoundMinRTT`
    tracked for sequence-based rounds in HyStart++ {{?RFC9406}}; and
 
-* `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`.
+* `queue_buildup_thresh` be `min(min_rtt + 4 ms, min_rtt * 1.10)`, where the
+   additive term (+4 ms) and the multiplicative term (×1.10) are RECOMMENDED
+   defaults.
 
 If `rtt_floor` is no greater than `queue_buildup_thresh`, the sender increases
 the congestion window (cwnd) by 2 bytes for every byte that is newly
@@ -130,11 +132,11 @@ increase the congestion window as in classic slow start; i.e., by 1 byte for
 every byte that is newly acknowledged, which results in a 2× growth of cwnd per
 round-trip.
 
-The additive term (+4 ms) and the multiplicative term (×1.10) of
-`queue_buildup_thresh` are RECOMMENDED defaults that provide tolerance for
-typical jitter while keeping Rapid Start's aggressive growth out of the RTT
-inflation range where early queueing-detection algorithms such as HyStart++
-are known to trigger. Therefore, HyStart++ can be used in conjunction with
+The construction of `queue_buildup_thresh` follows HyStart++'s bounded
+RTT-inflation approach, but uses a tighter RECOMMENDED threshold because the
+threshold is used to enable a more aggressive startup increase when queue
+buildup is unlikely, whereas HyStart++ uses RTT inflation to reduce growth by
+exiting slow start. Consequently, HyStart++ can be used in conjunction with
 Rapid Start.
 
 
