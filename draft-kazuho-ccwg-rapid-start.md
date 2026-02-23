@@ -90,9 +90,12 @@ behavior rather than sender-side burstiness, the sender SHOULD pace the packets
 over a full RTT, using the current RTT estimate, when sending the first window's
 worth of data.
 
-When pacing over a full RTT, Rapid Start can use an initial window up to 2× that
-of classic slow start with pacing, because spreading the transmission over a
-full RTT (rather than half an RTT) yields a comparable pacing rate.
+By pacing the packets over a full RTT, Rapid Start can use an initial window up
+to 2× that of classic slow start with pacing; spreading the transmission over a
+full RTT (rather than half an RTT) yields a comparable pacing rate. If this more
+aggressive first round-trip overshoots and congestion is signaled, Rapid Start
+compensates by reducing the congestion window as specified in
+{{congestion-handling}}.
 
 A sender using Careful Resume {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}
 satisfies these recommendations, because it requires that all packets sent in
