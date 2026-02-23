@@ -61,13 +61,13 @@ issues. It paces the initial congestion window over the full estimated RTT,
 allowing an initial window up to 2× that of classic slow start at a comparable
 pacing rate. It then grows the congestion window by 3× per round-trip until
 queue buildup is observed, after which it reverts to classic 2× growth. When
-congestion is signaled, Rapid Start momentarily pauses transmission and then
-reduces the window gradually in proportion to delivered and lost bytes. Doing so
-avoids burstiness as well as mitigating the risk of the bottleneck buffer
-becoming empty and the path becoming underutilized during recovery. After
-recovery, control is handed over to ordinary congestion avoidance, such as that
-of NewReno ({{?RFC6582}}) and QUIC congestion control
-({{Section 7 of !RFC9002}}).
+congestion is signaled, Rapid Start momentarily blocks sending to allow the
+bottleneck queue to drain slightly; it then resumes sending while reducing the
+window gradually in proportion to delivered and lost bytes. Doing so avoids
+burstiness as well as mitigating the risk of the bottleneck buffer becoming
+empty and the path becoming underutilized during recovery. After recovery,
+control is handed over to ordinary congestion avoidance, such as that of NewReno
+({{?RFC6582}}) and QUIC congestion control ({{Section 7 of !RFC9002}}).
 
 
 # Conventions and Definitions
@@ -158,8 +158,9 @@ controlled amount.
 cwnd *= silence_factor
 ~~~
 
-During the recovery period, the sender reduces the congestion window in
-proportion to the amount that has been newly acknowledged or lost:
+Then, for each ACK that results in an update of acknowledged or lost bytes while
+in the first recovery period, the sender reduces the congestion window in
+proportion to newly acknowledged or newly declared lost bytes:
 
 ~~~pseudocode
 cwnd -= ack_factor * bytes_newly_acked
@@ -184,6 +185,8 @@ where `pre_recovery_cwnd` is the congestion window immediately before entering
 the recovery period. The coefficients are chosen to be consistent with the
 tail-drop model, which yields a loss ratio of `1 - 1 / G` where `G` is the
 growth factor, using `G = 3` (the largest growth factor used by Rapid Start).
+With the reduction factors defined in {{reduction-factors}}, this lower bound
+simplifies to `pre_recovery_cwnd * beta / 3`.
 
 Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
@@ -193,12 +196,29 @@ window multiplied by the window decrease factor. This allows the sender to keep
 the congestion window at least as large as classic slow start on paths with very
 small BDPs when transitioning to congestion avoidance.
 
+Upon exiting the first recovery period, Rapid Start ends; thereafter, the
+congestion window is governed by the underlying congestion controller's ordinary
+rules.
+
 
 ### Deriving the Reduction Factors {#reduction-factors}
 
 The reduction factors are constants derived from the multiplicative window
-decrease factor (denoted beta) used by the congestion avoidance algorithm. The
-factors are calculated as:
+decrease factor (denoted beta) used by the congestion avoidance algorithm. They
+are chosen so that the recovery behavior described in {{congestion-handling}}
+has the following properties:
+
+* When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
+  as a fraction of the full BDP, the same as during the congestion avoidance
+  phase.
+
+* Upon exiting the recovery period, the congestion window becomes the full BDP
+  multiplied by beta, the same as during the congestion avoidance phase. This
+  holds independent of the loss ratio during the recovery period, unless limited
+  by the lower bounds on the congestion window.
+
+Using a single constant `K` to distribute the window reduction across the
+send-blocking step and the per-ACK reductions, the factors are calculated as:
 
 ~~~pseudocode
 K               = 11/18
@@ -222,16 +242,6 @@ silence_factor  = 53/60
 ack_factor      = 11/60
 loss_factor     = 53/60
 ~~~
-
-The formula guarantees the following properties:
-
-* When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
-  as a fraction of the full BDP, the same as during the congestion avoidance
-  phase.
-* Upon exiting the recovery period, the congestion window becomes the full BDP
-  multiplied by beta, the same as during the congestion avoidance phase. This
-  holds independent of the loss ratio during the recovery period, unless limited
-  by the bounds described in {{congestion-handling}}.
 
 
 ### Interaction with ECN
@@ -269,13 +279,33 @@ loss-induced delivery delay mode is largely avoided. The benefits of faster
 growth of the congestion window are thus more reliable.
 
 
-# Limitations
+# Considerations
 
-To estimate the BDP during the first recovery period, Rapid Start depends on the
-transport protocol accurately and promptly reporting the delivery status of each
-sent packet, even when the packet loss ratio is high. QUIC, with its explicit
-packet numbers and ACK frames capable of reporting many gaps, meets this
-criterion. However, with TCP, there can be issues producing a reliable estimate.
+Rapid Start's startup and recovery behavior is driven by feedback from ACKs and
+loss detection. In practice, packet transmission and ACK reception can be
+affected by scheduling delays and buffering within the host network stack and
+along the path, which can make observed RTT signals noisier and reduce the
+smoothness of the algorithm's response compared to an idealized per-packet
+model.
+
+
+## Considerations for TCP
+
+Rapid Start's recovery behavior is based on the QUIC-style model of tracking
+newly delivered and newly declared lost bytes as ACKs are processed. In QUIC,
+these quantities can be computed directly from acknowledged packet ranges and
+loss declarations over packet numbers. TCP implementations vary in how delivery
+and loss information is represented and exposed to congestion control; loss may
+be declared in multiple waves as the SACK scoreboard evolves, and accurately
+accounting newly declared lost bytes can be implementation-dependent (e.g.,
+avoiding double-counting across reordering and retransmission heuristics);
+RTO-driven recovery can further reduce the timeliness and fidelity of these
+signals. As a result, TCP implementations might not be able to produce a
+reliable estimate of delivered and newly declared lost bytes during the first
+recovery period, especially when loss is high.
+
+Therefore, it is up to each TCP implementation to determine whether and how the
+required delivered/lost byte accounting can be approximated robustly.
 
 
 # Security Considerations
