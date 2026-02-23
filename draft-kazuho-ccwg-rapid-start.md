@@ -158,8 +158,8 @@ controlled amount.
 cwnd *= silence_factor
 ~~~
 
-Then, for each ACK that results in an update of delivered or lost bytes while in
-the first recovery period, the sender reduces the congestion window in
+Then, for each ACK that results in an update of acknowledged or lost bytes while
+in the first recovery period, the sender reduces the congestion window in
 proportion to newly acknowledged or newly declared lost bytes:
 
 ~~~pseudocode
