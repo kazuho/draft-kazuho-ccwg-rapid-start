@@ -80,7 +80,7 @@ control is handed over to ordinary congestion avoidance, such as that of NewReno
 This section describes the algorithm used by Rapid Start.
 
 
-## Sending in the First Round Trip
+## Sending in the First Round-Trip
 
 Rapid Start uses a more aggressive growth factor than classic slow start. When
 such growth is used, sending the initial congestion window as a short burst can
