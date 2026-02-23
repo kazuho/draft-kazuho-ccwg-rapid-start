@@ -61,13 +61,13 @@ issues. It paces the initial congestion window over the full estimated RTT,
 allowing an initial window up to 2× that of classic slow start at a comparable
 pacing rate. It then grows the congestion window by 3× per round-trip until
 queue buildup is observed, after which it reverts to classic 2× growth. When
-congestion is signaled, Rapid Start momentarily pauses transmission and then
-reduces the window gradually in proportion to delivered and lost bytes. Doing so
-avoids burstiness as well as mitigating the risk of the bottleneck buffer
-becoming empty and the path becoming underutilized during recovery. After
-recovery, control is handed over to ordinary congestion avoidance, such as that
-of NewReno ({{?RFC6582}}) and QUIC congestion control
-({{Section 7 of !RFC9002}}).
+congestion is signaled, Rapid Start momentarily blocks sending to allow the
+bottleneck queue to drain slightly; it then resumes sending while reducing the
+window gradually in proportion to delivered and lost bytes. Doing so avoids
+burstiness as well as mitigating the risk of the bottleneck buffer becoming
+empty and the path becoming underutilized during recovery. After recovery,
+control is handed over to ordinary congestion avoidance, such as that of NewReno
+({{?RFC6582}}) and QUIC congestion control ({{Section 7 of !RFC9002}}).
 
 
 # Conventions and Definitions
