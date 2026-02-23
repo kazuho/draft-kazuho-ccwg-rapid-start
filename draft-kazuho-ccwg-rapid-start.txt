@@ -70,7 +70,7 @@ Table of Contents
    1.  Introduction
    2.  Conventions and Definitions
    3.  Algorithm
-     3.1.  Sending in the First Round Trip
+     3.1.  Sending in the First Round-Trip
      3.2.  Increasing the Congestion Window
      3.3.  Congestion Handling
        3.3.1.  Deriving the Reduction Factors
@@ -137,7 +137,7 @@ Table of Contents
 
    This section describes the algorithm used by Rapid Start.
 
-3.1.  Sending in the First Round Trip
+3.1.  Sending in the First Round-Trip
 
    Rapid Start uses a more aggressive growth factor than classic slow
    start.  When such growth is used, sending the initial congestion
@@ -148,10 +148,12 @@ Table of Contents
    a full RTT, using the current RTT estimate, when sending the first
    window's worth of data.
 
-   When pacing over a full RTT, Rapid Start can use an initial window up
-   to 2× that of classic slow start with pacing, because spreading the
+   By pacing the packets over a full RTT, Rapid Start can use an initial
+   window up to 2× that of classic slow start with pacing; spreading the
    transmission over a full RTT (rather than half an RTT) yields a
-   comparable pacing rate.
+   comparable pacing rate.  If this more aggressive first round-trip
+   overshoots and congestion is signaled, Rapid Start compensates by
+   reducing the congestion window as specified in Section 3.3.
 
    A sender using Careful Resume [CAREFUL-RESUME] satisfies these
    recommendations, because it requires that all packets sent in its
@@ -160,7 +162,7 @@ Table of Contents
 
 3.2.  Increasing the Congestion Window
 
-   Like Slow Start, Rapid Start increases the congestion window as
+   Like slow start, Rapid Start increases the congestion window as
    packets are acknowledged.  The difference is that when the path
    appears not to be building a queue, the sender uses a more aggressive
    startup increase.

@@ -1166,7 +1166,7 @@ ordinary congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-algorithm" class="internal xref">Algorithm</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
-                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-sending-in-the-first-round-" class="internal xref">Sending in the First Round Trip</a></p>
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-sending-in-the-first-round-" class="internal xref">Sending in the First Round-Trip</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
                 <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-increasing-the-congestion-w" class="internal xref">Increasing the Congestion Window</a></p>
@@ -1282,7 +1282,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <div id="sending-in-the-first-round-trip">
 <section id="section-3.1">
         <h3 id="name-sending-in-the-first-round-">
-<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-sending-in-the-first-round-" class="section-name selfRef">Sending in the First Round Trip</a>
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-sending-in-the-first-round-" class="section-name selfRef">Sending in the First Round-Trip</a>
         </h3>
 <p id="section-3.1-1">Rapid Start uses a more aggressive growth factor than classic slow start. When
 such growth is used, sending the initial congestion window as a short burst can
@@ -1291,9 +1291,12 @@ paced transmission. To ensure that Rapid Start observes the path's queueing
 behavior rather than sender-side burstiness, the sender <span class="bcp14">SHOULD</span> pace the packets
 over a full RTT, using the current RTT estimate, when sending the first window's
 worth of data.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.1-2">When pacing over a full RTT, Rapid Start can use an initial window up to 2× that
-of classic slow start with pacing, because spreading the transmission over a
-full RTT (rather than half an RTT) yields a comparable pacing rate.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">By pacing the packets over a full RTT, Rapid Start can use an initial window up
+to 2× that of classic slow start with pacing; spreading the transmission over a
+full RTT (rather than half an RTT) yields a comparable pacing rate. If this more
+aggressive first round-trip overshoots and congestion is signaled, Rapid Start
+compensates by reducing the congestion window as specified in
+<a href="#congestion-handling" class="auto internal xref">Section 3.3</a>.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <p id="section-3.1-3">A sender using Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span>
 satisfies these recommendations, because it requires that all packets sent in
 its Unvalidated Phase be paced based on <code>current_rtt</code>, regardless of prior
@@ -1305,7 +1308,7 @@ knowledge.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
         <h3 id="name-increasing-the-congestion-w">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-increasing-the-congestion-w" class="section-name selfRef">Increasing the Congestion Window</a>
         </h3>
-<p id="section-3.2-1">Like Slow Start, Rapid Start increases the congestion window as packets are
+<p id="section-3.2-1">Like slow start, Rapid Start increases the congestion window as packets are
 acknowledged. The difference is that when the path appears not to be building a
 queue, the sender uses a more aggressive startup increase.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.2-2">The sender determines if the path is building a queue by comparing the recent
