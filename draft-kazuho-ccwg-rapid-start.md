@@ -185,6 +185,8 @@ where `pre_recovery_cwnd` is the congestion window immediately before entering
 the recovery period. The coefficients are chosen to be consistent with the
 tail-drop model, which yields a loss ratio of `1 - 1 / G` where `G` is the
 growth factor, using `G = 3` (the largest growth factor used by Rapid Start).
+With the reduction factors defined in {{reduction-factors}}, this lower bound
+simplifies to `pre_recovery_cwnd * beta / 3`.
 
 Separately, the sender MUST NOT reduce the congestion window below the minima
 specified by {{RFC5681}} or {{RFC9002}}.
