@@ -274,13 +274,33 @@ loss-induced delivery delay mode is largely avoided. The benefits of faster
 growth of the congestion window are thus more reliable.
 
 
-# Limitations
+# Considerations
 
-To estimate the BDP during the first recovery period, Rapid Start depends on the
-transport protocol accurately and promptly reporting the delivery status of each
-sent packet, even when the packet loss ratio is high. QUIC, with its explicit
-packet numbers and ACK frames capable of reporting many gaps, meets this
-criterion. However, with TCP, there can be issues producing a reliable estimate.
+Rapid Start's startup and recovery behavior is driven by feedback from ACKs and
+loss detection. In practice, packet transmission and ACK reception can be
+affected by scheduling delays and buffering within the host network stack and
+along the path, which can make observed RTT signals noisier and reduce the
+smoothness of the algorithm's response compared to an idealized per-packet
+model.
+
+
+## Considerations for TCP
+
+Rapid Start's recovery behavior is based on the QUIC-style model of tracking
+newly delivered and newly declared lost bytes as ACKs are processed. In QUIC,
+these quantities can be computed directly from acknowledged packet ranges and
+loss declarations over packet numbers. TCP implementations vary in how delivery
+and loss information is represented and exposed to congestion control; loss may
+be declared in multiple waves as the SACK scoreboard evolves, and accurately
+accounting newly declared lost bytes can be implementation-dependent (e.g.,
+avoiding double-counting across reordering and retransmission heuristics);
+RTO-driven recovery can further reduce the timeliness and fidelity of these
+signals. As a result, TCP implementations might not be able to produce a
+reliable estimate of delivered and newly declared lost bytes during the first
+recovery period, especially when loss is high.
+
+Therefore, it is up to each TCP implementation to determine whether and how the
+required delivered/lost byte accounting can be approximated robustly.
 
 
 # Security Considerations
