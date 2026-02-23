@@ -102,7 +102,7 @@ knowledge.
 
 ## Increasing the Congestion Window
 
-Like Slow Start, Rapid Start increases the congestion window as packets are
+Like slow start, Rapid Start increases the congestion window as packets are
 acknowledged. The difference is that when the path appears not to be building a
 queue, the sender uses a more aggressive startup increase.
 
