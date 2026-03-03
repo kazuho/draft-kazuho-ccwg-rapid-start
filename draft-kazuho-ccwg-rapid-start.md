@@ -179,7 +179,8 @@ only due to bottleneck queue overflow; see {{derivation}}. At the same time, it
 limits the silence period so that no more is drained from the bottleneck queue
 than under congestion avoidance, reducing the risk of underutilizing the link
 even when the congestion window must be reduced significantly to compensate for
-the aggressive ramp-up.
+the aggressive ramp-up. The gradual reduction based on newly acknowledged and
+newly declared lost bytes also avoids burstiness when transmission resumes.
 
 To avoid overly sharp reduction caused by losses other than tail drops, the
 sender SHOULD NOT reduce the congestion window below
@@ -210,11 +211,9 @@ rules.
 
 ### Reduction Factors {#reduction-factors}
 
-The reduction factors are constants determined from the multiplicative window
-decrease factor (denoted `beta`) used by the congestion avoidance algorithm.
-They are chosen so that the recovery behavior described in
-{{congestion-handling}} has the following properties, under a tail-drop model
-where losses are caused only by overflow of the bottleneck queue:
+Under a tail-drop model where losses are caused only by overflow of the
+bottleneck queue, the recovery algorithm described in {{congestion-handling}}
+requires the following:
 
 * The post-recovery congestion window becomes the full BDP multiplied by `beta`,
   independent of the loss ratio.
@@ -222,23 +221,17 @@ where losses are caused only by overflow of the bottleneck queue:
 * The silence period drains at most `1 - beta` times the full BDP from the
   bottleneck queue, matching congestion avoidance.
 
-* After the silence period, the sender resumes transmission by adjusting the
-  congestion window in proportion to newly acknowledged and newly declared lost
-  bytes during the remainder of the first recovery period.
-
-These conditions make Rapid Start match congestion avoidance in the
+These requirements make Rapid Start match congestion avoidance in the
 post-recovery congestion window and in the maximum amount drained from the
-bottleneck queue, while also ensuring that transmission resumes smoothly after
-the silence period.
+bottleneck queue.
 
-The first condition requires:
+The first requirement implies:
 
 ~~~pseudocode
 loss_factor = silence_factor = beta + ack_factor
 ~~~
 
-and for the recovery algorithm described in {{congestion-handling}}, these
-conditions altogether yield:
+Taken together, these requirements yield:
 
 ~~~pseudocode
 K               = 2/3
