@@ -1210,10 +1210,13 @@ ordinary congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-deriving-the-reduction-fact" class="internal xref">Deriving the Reduction Factors</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1377,12 +1380,15 @@ cwnd -= ack_factor * bytes_newly_acked
 cwnd -= loss_factor * bytes_newly_lost
 </pre><a href="#section-3.3-5" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3-6">This approach ensures that, upon exiting the recovery period, the congestion
-window becomes a fraction of the full BDP (the sum of the idle BDP and the
-bottleneck queue size). At the same time, it keeps the silence period short
-enough that the sender is likely to resume transmission before the bottleneck is
-fully drained, even when the congestion window must be reduced significantly to
-compensate for the aggressive ramp-up.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-6">This approach is designed so that, upon exiting the recovery period, the
+congestion window becomes the full BDP (the sum of the idle BDP and the
+bottleneck queue size) multiplied by <code>beta</code>, assuming that packets are dropped
+only due to bottleneck queue overflow; see <a href="#derivation" class="auto internal xref">Appendix A</a>. At the same time, it
+limits the silence period so that no more is drained from the bottleneck queue
+than under congestion avoidance, reducing the risk of underutilizing the link
+even when the congestion window must be reduced significantly to compensate for
+the aggressive ramp-up. The gradual reduction based on newly acknowledged and
+newly declared lost bytes also avoids burstiness when transmission resumes.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
 <p id="section-3.3-7">To avoid overly sharp reduction caused by losses other than tail drops, the
 sender <span class="bcp14">SHOULD NOT</span> reduce the congestion window below<a href="#section-3.3-7" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3-8">
@@ -1391,10 +1397,10 @@ pre_recovery_cwnd * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
 </pre><a href="#section-3.3-8" class="pilcrow">¶</a>
 </div>
 <p id="section-3.3-9">where <code>pre_recovery_cwnd</code> is the congestion window immediately before entering
-the recovery period. The coefficients are chosen to be consistent with the
-tail-drop model, which yields a loss ratio of <code>1 - 1 / G</code> where <code>G</code> is the
-growth factor, using <code>G = 3</code> (the largest growth factor used by Rapid Start).
-With the reduction factors defined in <a href="#reduction-factors" class="auto internal xref">Section 3.3.1</a>, this lower bound
+the recovery period. The coefficients 1/3 and 2/3 correspond to the
+acknowledged and lost fractions, respectively, when packets overflow the
+bottleneck queue at the largest growth factor (3×) that Rapid Start uses. With
+the reduction factors defined in <a href="#reduction-factors" class="auto internal xref">Section 3.3.1</a>, this lower bound
 simplifies to <code>pre_recovery_cwnd * beta / 3</code>.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
 <p id="section-3.3-10">Separately, the sender <span class="bcp14">MUST NOT</span> reduce the congestion window below the minima
 specified by <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>.<a href="#section-3.3-10" class="pilcrow">¶</a></p>
@@ -1410,57 +1416,54 @@ rules.<a href="#section-3.3-12" class="pilcrow">¶</a></p>
           <h4 id="name-reduction-factors">
 <a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-reduction-factors" class="section-name selfRef">Reduction Factors</a>
           </h4>
-<p id="section-3.3.1-1">The reduction factors are constants determined from the multiplicative window
-decrease factor (denoted <code>beta</code>) used by the congestion avoidance algorithm.
-They are chosen so that the recovery behavior described in
-<a href="#congestion-handling" class="auto internal xref">Section 3.3</a> has the following properties:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-1">Under a tail-drop model where losses are caused only by overflow of the
+bottleneck queue, the recovery algorithm described in <a href="#congestion-handling" class="auto internal xref">Section 3.3</a>
+requires the following:<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.3.1-2.1">
-              <p id="section-3.3.1-2.1.1">Under a tail-drop model where losses are caused only by overflow of the
-bottleneck queue, the post-recovery congestion window becomes the full BDP
-multiplied by <code>beta</code>, independent of the loss ratio.<a href="#section-3.3.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.3.1-2.1.1">The post-recovery congestion window becomes the full BDP multiplied by <code>beta</code>,
+independent of the loss ratio.<a href="#section-3.3.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.3.1-2.2">
-              <p id="section-3.3.1-2.2.1">When the loss ratio is 2/3, the silence period drains <code>1 - beta</code> times the
-full BDP from the bottleneck queue.<a href="#section-3.3.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.3.1-2.2.1">The silence period drains at most <code>1 - beta</code> times the full BDP from the
+bottleneck queue, matching congestion avoidance.<a href="#section-3.3.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-3.3.1-3">These conditions are chosen so that Rapid Start matches congestion
-avoidance in both the post-recovery congestion window and the amount drained
-from the bottleneck queue, under the assumption that losses are small when
-recovery is entered from congestion avoidance.<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
-<p id="section-3.3.1-4">The first condition requires:<a href="#section-3.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-3">These requirements make Rapid Start match congestion avoidance in the
+post-recovery congestion window and in the maximum amount drained from the
+bottleneck queue.<a href="#section-3.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-4">The first requirement implies:<a href="#section-3.3.1-4" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-5">
 <pre>
 loss_factor = silence_factor = beta + ack_factor
 </pre><a href="#section-3.3.1-5" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3.1-6">Taken together, these conditions yield the following formulas, which can be
-expressed using a constant <code>K</code>:<a href="#section-3.3.1-6" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-6">Taken together, these requirements yield:<a href="#section-3.3.1-6" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-7">
 <pre>
-K               = 11/18
+K               = 2/3
 silence_factor  = beta + K * (1 - beta)
 ack_factor      = K * (1 - beta)
 loss_factor     = beta + K * (1 - beta)
 </pre><a href="#section-3.3.1-7" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3.1-8">Specifically, when <code>beta</code> is 0.5, the values are:<a href="#section-3.3.1-8" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-8">When <code>beta</code> is 0.5, the values are:<a href="#section-3.3.1-8" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-9">
 <pre>
-silence_factor  = 29/36
-ack_factor      = 11/36
-loss_factor     = 29/36
+silence_factor  = 5/6
+ack_factor      = 1/3
+loss_factor     = 5/6
 </pre><a href="#section-3.3.1-9" class="pilcrow">¶</a>
 </div>
 <p id="section-3.3.1-10">When <code>beta</code> is 0.7 (i.e., that of CUBIC <span>[<a href="#RFC9438" class="cite xref">RFC9438</a>]</span>), the values are:<a href="#section-3.3.1-10" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3.1-11">
 <pre>
-silence_factor  = 53/60
-ack_factor      = 11/60
-loss_factor     = 53/60
+silence_factor  = 9/10
+ack_factor      = 1/5
+loss_factor     = 9/10
 </pre><a href="#section-3.3.1-11" class="pilcrow">¶</a>
 </div>
+<p id="section-3.3.1-12"><a href="#derivation" class="auto internal xref">Appendix A</a> derives these formulas.<a href="#section-3.3.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="interaction-with-ecn">
@@ -1613,34 +1616,182 @@ required delivered/lost byte accounting can be approximated robustly.<a href="#s
 </div>
 </section>
 </div>
-<div id="acknowledgments">
+<div id="derivation">
 <section id="appendix-A">
+      <h2 id="name-deriving-the-reduction-fact">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-deriving-the-reduction-fact" class="section-name selfRef">Deriving the Reduction Factors</a>
+      </h2>
+<p id="appendix-A-1">This appendix derives the reduction factors used by the recovery algorithm in
+<a href="#congestion-handling" class="auto internal xref">Section 3.3</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">Under a tail-drop model, let <code>full_bdp</code> be the path's full bandwidth-delay
+product. Let <code>bytes_acked</code> and <code>bytes_lost</code> denote the number of bytes newly
+acknowledged and newly declared lost during a recovery period. Assuming that the
+sender is congestion-window-limited when entering the recovery period, all bytes
+in flight at that point are either newly acknowledged or newly declared lost by
+the time the recovery period ends. Therefore, the congestion window immediately
+before entering recovery is:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-3">
+<pre>
+pre_recovery_cwnd = bytes_acked + bytes_lost
+</pre><a href="#appendix-A-3" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-4">The congestion window after processing all acknowledgements and losses in the
+recovery period is:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-5">
+<pre>
+post_recovery_cwnd = pre_recovery_cwnd * silence_factor
+                     - bytes_acked * ack_factor
+                     - bytes_lost * loss_factor
+</pre><a href="#appendix-A-5" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-6">The first requirement of <a href="#reduction-factors" class="auto internal xref">Section 3.3.1</a> is that the post-recovery
+congestion window becomes <code>full_bdp * beta</code>, independent of the loss ratio.
+Under the tail-drop model, <code>bytes_acked = full_bdp</code>. Substituting these
+relations into the expression for <code>post_recovery_cwnd</code> gives:<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-7">
+<pre>
+full_bdp * beta
+    = pre_recovery_cwnd * silence_factor
+        - bytes_acked * ack_factor
+        - bytes_lost * loss_factor
+    = bytes_acked * (silence_factor - ack_factor)
+        + bytes_lost * (silence_factor - loss_factor)
+</pre><a href="#appendix-A-7" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-8">For this expression to equal <code>full_bdp * beta</code> independent of the loss ratio,
+the coefficient of <code>bytes_lost</code> has to be zero, and the coefficient of
+<code>bytes_acked</code> has to be <code>beta</code>. Therefore:<a href="#appendix-A-8" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-9">
+<pre>
+silence_factor - loss_factor = 0
+silence_factor - ack_factor = beta
+</pre><a href="#appendix-A-9" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-10">or equivalently:<a href="#appendix-A-10" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-11">
+<pre>
+loss_factor = silence_factor = beta + ack_factor
+</pre><a href="#appendix-A-11" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-12">To derive factors satisfying the second requirement — that the silence period
+drains at most <code>1 - beta</code> times the full BDP from the bottleneck queue, matching
+congestion avoidance — it is sufficient to consider the case that yields the
+longest silence period. In the recovery algorithm of <a href="#congestion-handling" class="auto internal xref">Section 3.3</a>,
+the sender resumes transmission when the congestion window catches up with bytes
+in flight. Under this recovery rule, the silence period becomes longer as the
+loss ratio increases. Because Rapid Start uses at most a growth factor of 3, the
+largest possible loss ratio is <code>2/3</code>, at which point the silence period is the
+longest.<a href="#appendix-A-12" class="pilcrow">¶</a></p>
+<p id="appendix-A-13">Because the loss ratio is <code>2/3</code>, the congestion window immediately before
+entering recovery is three times the full BDP:<a href="#appendix-A-13" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-14">
+<pre>
+pre_recovery_cwnd = 3 * full_bdp
+</pre><a href="#appendix-A-14" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-15">Let <code>x</code> be the number of newly acknowledged bytes, normalized by the full BDP,
+measured from the start of the recovery period. Because two bytes are newly
+declared lost for every byte that is newly acknowledged, after <code>x * full_bdp</code>
+bytes are acknowledged, bytes in flight is:<a href="#appendix-A-15" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-16">
+<pre>
+bytes_in_flight = 3 * (1 - x) * full_bdp
+</pre><a href="#appendix-A-16" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-17">Over the same interval, the congestion window is:<a href="#appendix-A-17" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-18">
+<pre>
+cwnd = 3 * full_bdp * silence_factor
+       - x * full_bdp * ack_factor
+       - 2 * x * full_bdp * loss_factor
+</pre><a href="#appendix-A-18" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-19">The sender resumes transmission once the congestion window catches up with bytes
+in flight. Satisfying the second requirement is therefore equivalent to
+requiring that transmission resumes when:<a href="#appendix-A-19" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-20">
+<pre>
+x = 1 - beta
+</pre><a href="#appendix-A-20" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-21">At that point, <code>cwnd = bytes_in_flight</code>, therefore:<a href="#appendix-A-21" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-22">
+<pre>
+3 * (1 - x) * full_bdp
+    = 3 * full_bdp * silence_factor
+        - x * full_bdp * ack_factor
+        - 2 * x * full_bdp * loss_factor
+</pre><a href="#appendix-A-22" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-23">Dividing by <code>full_bdp</code> and substituting <code>x = 1 - beta</code>:<a href="#appendix-A-23" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-24">
+<pre>
+3 * beta
+    = 3 * silence_factor
+        - (1 - beta) * ack_factor
+        - 2 * (1 - beta) * loss_factor
+</pre><a href="#appendix-A-24" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-25">Substituting:<a href="#appendix-A-25" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-26">
+<pre>
+loss_factor = silence_factor = beta + ack_factor
+</pre><a href="#appendix-A-26" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-27">into the previous equation yields:<a href="#appendix-A-27" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-28">
+<pre>
+3 * beta
+    = 3 * (beta + ack_factor)
+       - (1 - beta) * ack_factor
+       - 2 * (1 - beta) * (beta + ack_factor)
+</pre><a href="#appendix-A-28" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-29">which simplifies to:<a href="#appendix-A-29" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-30">
+<pre>
+ack_factor = (2 / 3) * (1 - beta)
+</pre><a href="#appendix-A-30" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-31">Equivalently, using a constant <code>K</code>, the resulting formulas are:<a href="#appendix-A-31" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="appendix-A-32">
+<pre>
+K               = 2/3
+silence_factor  = beta + K * (1 - beta)
+ack_factor      = K * (1 - beta)
+loss_factor     = beta + K * (1 - beta)
+</pre><a href="#appendix-A-32" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">Rapid Start combines three ideas: (1) pacing the initial window over a full RTT,
+<p id="appendix-B-1">Rapid Start combines three ideas: (1) pacing the initial window over a full RTT,
 (2) a more aggressive startup increase when queue buildup is not observed, and
-(3) a recovery behavior that smoothly converges the congestion window.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
-<p id="appendix-A-2">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a predecessor for (1): it paces an
+(3) a recovery behavior that smoothly converges the congestion window.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a predecessor for (1): it paces an
 initial window over a full RTT (based on a current RTT estimate) to avoid bursts
 when (re)starting. Rapid Start applies the same full-RTT pacing principle during
-starting.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
-<p id="appendix-A-3">"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
+starting.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<p id="appendix-B-3">"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
 al.) advocates a similar approach for (2), built on top of HyStart that
 increases the congestion window by up to 4× per round-trip based on ACK
-dispersal and RTT.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
-<p id="appendix-A-4">Compared to SUSS, Rapid Start bases the (2) decision solely on RTT-based queue
+dispersal and RTT.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">Compared to SUSS, Rapid Start bases the (2) decision solely on RTT-based queue
 buildup detection, making it easier to integrate with other mechanisms and
-specifications such as HyStart++ <span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span>.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
-<p id="appendix-A-5">For (3), Proportional Rate Reduction <span>[<a href="#RFC9937" class="cite xref">RFC9937</a>]</span> is related work in that it
+specifications such as HyStart++ <span>[<a href="#RFC9406" class="cite xref">RFC9406</a>]</span>.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+<p id="appendix-B-5">For (3), Proportional Rate Reduction <span>[<a href="#RFC9937" class="cite xref">RFC9937</a>]</span> is related work in that it
 regulates sending during recovery to avoid bursts and underutilization. Rapid
 Start differs by defining a startup-specific recovery behavior, allowing the
 congestion window to smoothly converge before handing over to congestion
-avoidance.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
+avoidance.<a href="#appendix-B-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
