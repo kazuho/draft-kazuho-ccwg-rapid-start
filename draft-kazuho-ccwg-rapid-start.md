@@ -206,9 +206,9 @@ congestion window is governed by the underlying congestion controller's ordinary
 rules.
 
 
-### Deriving the Reduction Factors {#reduction-factors}
+### Reduction Factors {#reduction-factors}
 
-The reduction factors are constants derived from the multiplicative window
+The reduction factors are constants determined from the multiplicative window
 decrease factor (denoted `beta`) used by the congestion avoidance algorithm.
 They are chosen so that the recovery behavior described in
 {{congestion-handling}} has the following properties:
@@ -225,14 +225,14 @@ avoidance in both the post-recovery congestion window and the amount drained
 from the bottleneck queue, under the assumption that losses are small when
 recovery is entered from congestion avoidance.
 
-The first condition implies:
+The first condition requires:
 
 ~~~pseudocode
 loss_factor = silence_factor = beta + ack_factor
 ~~~
 
-Using the second condition to determine a single constant `K`, the factors are
-calculated as:
+Taken together, these conditions yield the following formulas, which can be
+expressed using a constant `K`:
 
 ~~~pseudocode
 K               = 11/18
