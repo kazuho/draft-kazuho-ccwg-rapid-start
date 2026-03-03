@@ -220,7 +220,7 @@ where losses are caused only by overflow of the bottleneck queue:
   independent of the loss ratio.
 
 * The silence period drains at most `1 - beta` times the full BDP from the
-  bottleneck queue.
+  bottleneck queue, matching congestion avoidance.
 
 * After the silence period, the sender resumes transmission by adjusting the
   congestion window in proportion to newly acknowledged and newly declared lost
