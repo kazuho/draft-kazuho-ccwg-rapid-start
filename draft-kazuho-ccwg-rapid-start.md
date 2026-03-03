@@ -425,7 +425,7 @@ cwnd = 3 * full_bdp * silence_factor
 ~~~
 
 The sender resumes transmission once the congestion window catches up with bytes
-in flight. Satisfying the second requirement therefore is equivalent to
+in flight. Satisfying the second requirement is therefore equivalent to
 requiring that transmission resumes when:
 
 ~~~pseudocode
