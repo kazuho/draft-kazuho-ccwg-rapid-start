@@ -391,9 +391,9 @@ loss_factor = silence_factor = beta + ack_factor
 ~~~
 
 To derive factors satisfying the second requirement - that the silence period
-drainds at most `1 - beta` times the full BDP from the bottleneck queue,
-matching congestion avoidance - consider the tail-drop model when the loss ratio
-is 2/3. In the recovery algorithm of {{congestion-handling}}, the sender resumes
+drains at most `1 - beta` times the full BDP from the bottleneck queue, matching
+congestion avoidance - consider the tail-drop model when the loss ratio is 2/3.
+In the recovery algorithm of {{congestion-handling}}, the sender resumes
 transmission when the congestion window catches up with bytes in flight. Within
 its fixed-factor linear model, the silence period becomes longer as the loss
 ratio increases. Because Rapid Start uses at most a growth factor of 3, the
