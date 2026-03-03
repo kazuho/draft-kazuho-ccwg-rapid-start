@@ -149,7 +149,9 @@ When Rapid Start observes the first packet loss or an explicit congestion signal
 (e.g., ECN-CE), the sender enters the first recovery period (TCP:
 {{Section 3.2 of RFC5681}}; QUIC: {{Section 7.3.2 of RFC9002}}), but adjusts the
 congestion window in an alternative manner to smoothly converge after the more
-aggressive startup.
+aggressive startup. Specifically, it briefly pauses sending to allow the
+bottleneck queue to drain slightly, then gradually reduces the congestion window
+during recovery.
 
 When entering the recovery period, the sender slightly scales down the current
 congestion window using a silence factor. As a result of this reduction,
@@ -204,24 +206,33 @@ congestion window is governed by the underlying congestion controller's ordinary
 rules.
 
 
-### Deriving the Reduction Factors {#reduction-factors}
+### Reduction Factors {#reduction-factors}
 
-The reduction factors are constants derived from the multiplicative window
-decrease factor (denoted beta) used by the congestion avoidance algorithm. They
-are chosen so that the recovery behavior described in {{congestion-handling}}
-has the following properties:
+The reduction factors are constants determined from the multiplicative window
+decrease factor (denoted `beta`) used by the congestion avoidance algorithm.
+They are chosen so that the recovery behavior described in
+{{congestion-handling}} has the following properties:
 
-* When the loss ratio is 2/3, the duration of the silence period is `1 - beta`
-  as a fraction of the full BDP, the same as during the congestion avoidance
-  phase.
+* Under a tail-drop model where losses are caused only by overflow of the
+  bottleneck queue, the post-recovery congestion window becomes the full BDP
+  multiplied by `beta`, independent of the loss ratio.
 
-* Upon exiting the recovery period, the congestion window becomes the full BDP
-  multiplied by beta, the same as during the congestion avoidance phase. This
-  holds independent of the loss ratio during the recovery period, unless limited
-  by the lower bounds on the congestion window.
+* When the loss ratio is 2/3, the silence period drains `1 - beta` times the
+  full BDP from the bottleneck queue.
 
-Using a single constant `K` to distribute the window reduction across the
-send-blocking step and the per-ACK reductions, the factors are calculated as:
+These conditions are chosen so that Rapid Start matches congestion
+avoidance in both the post-recovery congestion window and the amount drained
+from the bottleneck queue, under the assumption that losses are small when
+recovery is entered from congestion avoidance.
+
+The first condition requires:
+
+~~~pseudocode
+loss_factor = silence_factor = beta + ack_factor
+~~~
+
+Taken together, these conditions yield the following formulas, which can be
+expressed using a constant `K`:
 
 ~~~pseudocode
 K               = 11/18
