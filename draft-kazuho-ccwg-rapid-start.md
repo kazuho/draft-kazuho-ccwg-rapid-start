@@ -172,12 +172,14 @@ cwnd -= ack_factor * bytes_newly_acked
 cwnd -= loss_factor * bytes_newly_lost
 ~~~
 
-This approach ensures that, upon exiting the recovery period, the congestion
-window becomes a fraction of the full BDP (the sum of the idle BDP and the
-bottleneck queue size). At the same time, it keeps the silence period short
-enough that the sender is likely to resume transmission before the bottleneck is
-fully drained, even when the congestion window must be reduced significantly to
-compensate for the aggressive ramp-up.
+This approach is designed so that, upon exiting the recovery period, the
+congestion window becomes the full BDP (the sum of the idle BDP and the
+bottleneck queue size) multiplied by `beta`, assuming that packets are dropped
+only due to bottleneck queue overflow; see {{derivation}}. At the same time, it
+limits the silence period so that no more is drained from the bottleneck queue
+than under congestion avoidance, reducing the risk of underutilizing the link
+even when the congestion window must be reduced significantly to compensate for
+the aggressive ramp-up.
 
 To avoid overly sharp reduction caused by losses other than tail drops, the
 sender SHOULD NOT reduce the congestion window below
