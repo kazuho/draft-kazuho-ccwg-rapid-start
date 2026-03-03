@@ -149,7 +149,9 @@ When Rapid Start observes the first packet loss or an explicit congestion signal
 (e.g., ECN-CE), the sender enters the first recovery period (TCP:
 {{Section 3.2 of RFC5681}}; QUIC: {{Section 7.3.2 of RFC9002}}), but adjusts the
 congestion window in an alternative manner to smoothly converge after the more
-aggressive startup.
+aggressive startup. Specifically, it briefly pauses sending to allow the
+bottleneck queue to drain slightly, then gradually reduces the congestion window
+during recovery.
 
 When entering the recovery period, the sender slightly scales down the current
 congestion window using a silence factor. As a result of this reduction,
