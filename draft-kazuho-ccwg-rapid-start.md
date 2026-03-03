@@ -337,8 +337,8 @@ This document has no IANA actions.
 
 # Deriving the Reduction Factors {#derivation}
 
-This appendix derives the reduction factors used by the recovery algorithm in
-{{congestion-handling}}.
+This appendix derives the reduction factors specified in {{reduction-factors}}
+and used by the recovery algorithm in {{congestion-handling}}.
 
 Under a tail-drop model, let `full_bdp` be the path's full bandwidth-delay
 product. Let `bytes_acked` and `bytes_lost` denote the number of bytes newly
