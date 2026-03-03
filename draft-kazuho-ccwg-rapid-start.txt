@@ -439,8 +439,8 @@ Table of Contents
 
 Appendix A.  Deriving the Reduction Factors
 
-   This appendix derives the reduction factors used by the recovery
-   algorithm in Section 3.3.
+   This appendix derives the reduction factors specified in
+   Section 3.3.1 and used by the recovery algorithm in Section 3.3.
 
    Under a tail-drop model, let full_bdp be the path's full bandwidth-
    delay product.  Let bytes_acked and bytes_lost denote the number of
