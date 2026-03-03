@@ -342,42 +342,35 @@ This document has no IANA actions.
 
 # Deriving the Reduction Factors {#derivation}
 
-To derive the first property of {{reduction-factors}}, let `pre_recovery_cwnd`
-be the congestion window immediately before entering the first recovery period,
-and let `post_recovery_cwnd` be the congestion window upon exiting that recovery
-period. Also, let `bytes_acked` and `bytes_lost` be the total number of newly
-acknowledged and newly declared lost bytes, respectively, over that recovery
-period.
+This appendix derives the reduction factors used by the recovery algorithm in
+{{congestion-handling}}.
 
-From the algorithm in {{congestion-handling}}, the congestion window at the end
-of the recovery is:
-
-~~~pseudocode
-post_recovery_cwnd
-    = pre_recovery_cwnd * silence_factor
-        - bytes_acked * ack_factor
-        - bytes_lost * loss_factor
-~~~
-
-Under the tail-drop model, the amount of data delivered during the recovery
-period is the full BDP. Therefore:
-
-~~~pseudocode
-bytes_acked = full_bdp
-~~~
-
-Since `pre_recovery_cwnd` consists of the bytes that are delivered and the bytes
-that are lost:
+Under a tail-drop model, let `full_bdp` be the path's full bandwidth-delay
+product. Let `bytes_acked` and `bytes_lost` be the number of newly acknowledged
+and newly declared lost bytes during a recovery period. Because bytes in flight
+immediately before recovery equals the sum of these values, the congestion
+window immediately before recovery is:
 
 ~~~pseudocode
 pre_recovery_cwnd = bytes_acked + bytes_lost
 ~~~
 
-Substituting these relations into the expression for `post_recovery_cwnd`, and
-requiring the result to equal `beta * full_bdp`, yields:
+The congestion window after processing all acknowledgements and losses in the
+recovery period is:
 
 ~~~pseudocode
-full_bdp * beta
+post_recovery_cwnd = pre_recovery_cwnd * silence_factor
+                     - bytes_acked * ack_factor
+                     - bytes_lost * loss_factor
+~~~
+
+The first property of {{reduction-factors}} requires the post-recovery
+congestion window to equal `beta * full_bdp`, independent of the loss ratio.
+Under the tail-drop model, `bytes_acked = full_bdp`. Therefore, substituting
+these relations into the expression for `post_recovery_cwnd`:
+
+~~~pseudocode
+beta * full_bdp
     = pre_recovery_cwnd * silence_factor
         - bytes_acked * ack_factor
         - bytes_lost * loss_factor
@@ -400,8 +393,14 @@ or equivalently:
 loss_factor = silence_factor = beta + ack_factor
 ~~~
 
-To derive the second property, consider the tail-drop model when the loss ratio
-is 2/3.
+To derive factors satisfying the second property, consider the tail-drop model
+when the loss ratio is 2/3. In the recovery algorithm of
+{{congestion-handling}}, the sender resumes transmission when the congestion
+window catches up with bytes in flight. Within its fixed-factor linear model,
+the silence period becomes longer as the loss ratio increases. Because Rapid
+Start uses at most a growth factor of 3, the largest loss ratio under this model
+is 2/3. Therefore, it is sufficient to derive the factors by considering that
+case.
 
 Because the loss ratio is 2/3, the congestion window immediately before entering
 recovery is three times the full BDP:
@@ -423,41 +422,37 @@ Over the same interval, the congestion window is:
 
 ~~~pseudocode
 cwnd = 3 * full_bdp * silence_factor
-      - x * full_bdp * ack_factor
-      - 2 * x * full_bdp * loss_factor
+       - x * full_bdp * ack_factor
+       - 2 * x * full_bdp * loss_factor
 ~~~
 
-Rapid Start exits the silence period and resumes transmission when bytes in
-flight is no greater than the congestion window. Therefore, the resumption point
-is determined by:
-
-~~~pseudocode
-3 * (1 - x) * full_bdp
-  = 3 * full_bdp * silence_factor
-    - x * full_bdp * ack_factor
-    - 2 * x * full_bdp * loss_factor
-~~~
-
-
-Dividing by `3 * full_bdp` gives:
-
-~~~pseudocode
-1 - x = silence_factor
-        - (ack_factor / 3) * x
-        - (2 * loss_factor / 3) * x
-~~~
-
-The second condition of {{reduction-factors}} requires the sender to resume
-transmission after `1 - beta` times the full BDP has been drained from the
-bottleneck queue. Under the assumptions above, that is equivalent to requiring
-the same resumption point as ordinary congestion avoidance after applying the
-multiplicative decrease factor `beta`, namely:
+The sender resumes transmission once the congestion window catches up with bytes
+in flight. Because this is the worst case, satisfying the second property is
+equivalent to requiring that transmission resumes when:
 
 ~~~pseudocode
 x = 1 - beta
 ~~~
 
-Substituting this relation, together with
+At that point, `cwnd = bytes_in_flight`, therefore:
+
+~~~pseudocode
+3 * (1 - x) * full_bdp
+    = 3 * full_bdp * silence_factor
+        - x * full_bdp * ack_factor
+        - 2 * x * full_bdp * loss_factor
+~~~
+
+Dividing by `full_bdp` and substituting `x = 1 - beta`:
+
+~~~pseudocode
+3 * beta
+    = 3 * silence_factor
+        - (1 - beta) * ack_factor
+        - 2 * (1 - beta) * loss_factor
+~~~
+
+Substituting:
 
 ~~~pseudocode
 loss_factor = silence_factor = beta + ack_factor
@@ -466,9 +461,10 @@ loss_factor = silence_factor = beta + ack_factor
 into the previous equation yields:
 
 ~~~pseudocode
-beta = beta + ack_factor
-       - (ack_factor / 3) * (1 - beta)
-       - (2 * (beta + ack_factor) / 3) * (1 - beta)
+3 * beta
+    = 3 * (beta + ack_factor)
+       - (1 - beta) * ack_factor
+       - 2 * (1 - beta) * (beta + ack_factor)
 ~~~
 
 which simplifies to:
