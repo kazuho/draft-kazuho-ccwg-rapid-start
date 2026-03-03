@@ -379,8 +379,8 @@ full_bdp * beta
 ~~~
 
 For this expression to equal `full_bdp * beta` independent of the loss ratio,
-the coefficient of `bytes_lost` has to be zero, and the coefficient of
-`bytes_acked` has to equal `beta`. Therefore:
+the coefficient of `bytes_lost` must be zero, and the coefficient of
+`bytes_acked` must equal `beta`. Therefore:
 
 ~~~pseudocode
 silence_factor - loss_factor = 0
