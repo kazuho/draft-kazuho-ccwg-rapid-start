@@ -210,8 +210,33 @@ rules.
 
 The reduction factors are constants determined from the multiplicative window
 decrease factor (denoted `beta`) used by the congestion avoidance algorithm.
+They are chosen so that the recovery behavior described in
+{{congestion-handling}} has the following properties, under a tail-drop model
+where losses are caused only by overflow of the bottleneck queue:
 
-Specifically, using a constant `K`, the factors are defined as:
+* The post-recovery congestion window becomes the full BDP multiplied by `beta`,
+  independent of the loss ratio.
+
+* The silence period drains at most `1 - beta` times the full BDP from the
+  bottleneck queue.
+
+* After the silence period, the sender resumes transmission by adjusting the
+  congestion window in proportion to newly acknowledged and newly declared lost
+  bytes during the remainder of the first recovery period.
+
+These conditions make Rapid Start match congestion avoidance in the
+post-recovery congestion window and in the maximum amount drained from the
+bottleneck queue, while also ensuring that transmission resumes smoothly after
+the silence period.
+
+The first condition requires:
+
+~~~pseudocode
+loss_factor = silence_factor = beta + ack_factor
+~~~
+
+and for the recovery algorithm described in {{congestion-handling}}, these
+conditions altogether yield:
 
 ~~~pseudocode
 K               = 2/3
@@ -236,23 +261,8 @@ ack_factor      = 1/5
 loss_factor     = 9/10
 ~~~
 
+{{derivation}} derives these formulas.
 
-These values are chosen so that the recovery behavior described in
-{{congestion-handling}} has the following properties:
-
-* Under a tail-drop model where losses are caused only by overflow of the
-  bottleneck queue, the post-recovery congestion window becomes the full BDP
-  multiplied by `beta`, independent of the loss ratio.
-
-* When the loss ratio is 2/3, the silence period drains `1 - beta` times the
-  full BDP from the bottleneck queue.
-
-These conditions guarantee that Rapid Start matches congestion avoidance in
-both the post-recovery congestion window and the amount drained from the
-bottleneck queue, under the assumption that losses are small when recovery is
-entered from congestion avoidance.
-
-The derivation process of the factors is described in {{derivation}}.
 
 ### Interaction with ECN
 
