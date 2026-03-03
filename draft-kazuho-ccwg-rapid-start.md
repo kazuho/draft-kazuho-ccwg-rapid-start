@@ -211,9 +211,8 @@ rules.
 
 ### Reduction Factors {#reduction-factors}
 
-Under a tail-drop model where losses are caused only by overflow of the
-bottleneck queue, the recovery algorithm described in {{congestion-handling}}
-requires the following:
+Assuming that losses are caused only by overflow of the bottleneck queue, the
+recovery algorithm described in {{congestion-handling}} requires the following:
 
 * The post-recovery congestion window becomes the full BDP multiplied by `beta`,
   independent of the loss ratio.
@@ -340,13 +339,16 @@ This document has no IANA actions.
 This appendix derives the reduction factors specified in {{reduction-factors}}
 and used by the recovery algorithm in {{congestion-handling}}.
 
-Under a tail-drop model, let `full_bdp` be the path's full bandwidth-delay
-product. Let `bytes_acked` and `bytes_lost` denote the number of bytes newly
-acknowledged and newly declared lost during a recovery period. Assuming that the
-sender is congestion-window-limited when entering the recovery period, all bytes
-in flight at that point are either newly acknowledged or newly declared lost by
-the time the recovery period ends. Therefore, the congestion window immediately
-before entering recovery is:
+For the derivation, consider a tail-drop model in which packets are lost only
+due to overflow of the bottleneck queue, and assume that the sender is
+congestion-window-limited when entering recovery. Let `full_bdp` be the path's
+full bandwidth-delay product. Let `bytes_acked` and `bytes_lost` denote the
+number of bytes newly acknowledged and newly declared lost during a recovery
+period.
+
+Immediately before entering the recovery period, the congestion window equals
+the bytes in flight. By the end of the recovery period, those bytes are either
+newly acknowledged or newly declared lost. Therefore:
 
 ~~~pseudocode
 pre_recovery_cwnd = bytes_acked + bytes_lost
@@ -363,8 +365,9 @@ post_recovery_cwnd = pre_recovery_cwnd * silence_factor
 
 The first requirement of {{reduction-factors}} is that the post-recovery
 congestion window becomes `full_bdp * beta`, independent of the loss ratio.
-Under the tail-drop model, `bytes_acked = full_bdp`. Substituting these
-relations into the expression for `post_recovery_cwnd` gives:
+Under the derivation assumptions, the bytes newly acknowledged during recovery
+equal one full BDP, i.e., `bytes_acked = full_bdp`. Substituting these relations
+into the expression for `post_recovery_cwnd` gives:
 
 ~~~pseudocode
 full_bdp * beta
@@ -377,7 +380,7 @@ full_bdp * beta
 
 For this expression to equal `full_bdp * beta` independent of the loss ratio,
 the coefficient of `bytes_lost` has to be zero, and the coefficient of
-`bytes_acked` has to be `beta`. Therefore:
+`bytes_acked` has to equal `beta`. Therefore:
 
 ~~~pseudocode
 silence_factor - loss_factor = 0
