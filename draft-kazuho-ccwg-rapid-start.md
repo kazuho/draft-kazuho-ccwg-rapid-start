@@ -206,7 +206,7 @@ congestion window is governed by the underlying congestion controller's ordinary
 rules.
 
 
-### Reduction Factors {#reduction-factors}
+### Deriving the Reduction Factors {#reduction-factors}
 
 The reduction factors are constants determined from the multiplicative window
 decrease factor (denoted `beta`) used by the congestion avoidance algorithm.
@@ -225,17 +225,145 @@ avoidance in both the post-recovery congestion window and the amount drained
 from the bottleneck queue, under the assumption that losses are small when
 recovery is entered from congestion avoidance.
 
-The first condition requires:
+To derive the first condition, let `pre_recovery_cwnd` be the congestion window
+immediately before entering the first recovery period, and let
+`post_recovery_cwnd` be the congestion window upon exiting that recovery period.
+Also, let `bytes_acked` and `bytes_lost` be the total number of newly
+acknowledged and newly declared lost bytes, respectively, over that recovery
+period.
+
+From the algorithm in {{congestion-handling}}, the congestion winow at the end
+of the recovery is:
+
+~~~pseudocode
+post_recovery_cwnd
+    = pre_recovery_cwnd * silence_factor
+        - bytes_acked * ack_factor
+        - bytes_lost * loss_factor
+~~~
+
+Under the tail-drop model, the amount of data delivered during the recovery
+period is the full BDP. Therefore:
+
+~~~pseudocode
+bytes_acked = full_bdp
+~~~
+
+Since `pre_recovery_cwnd` consists of the bytes that are delivered and the bytes
+that are lost:
+
+~~~pseudocode
+pre_recovery_cwnd = bytes_acked + bytes_lost
+~~~
+
+Substituting these relations into the expression for `post_recovery_cwnd`, and
+requiring the result to equal `beta * full_bdp`, yields:
+
+~~~pseudocode
+full_bdp * beta
+    = pre_recovery_cwnd * silence_factor
+        - bytes_acked * ack_factor
+        - bytes_lost * loss_factor
+    = bytes_acked * (silence_factor - ack_factor)
+        + bytes_lost * (silence_factor - loss_factor)
+~~~
+
+For this expression to equal `beta * full_bdp` independent of the loss ratio,
+the coefficient of `bytes_lost` has to be zero, and the coefficient of
+`bytes_acked` has to be `beta`. Therefore:
+
+~~~psuedocode
+silence_factor - loss_factor = 0
+silence_factor - ack_factor = beta
+~~~
+
+or equivalently:
 
 ~~~pseudocode
 loss_factor = silence_factor = beta + ack_factor
 ~~~
 
-Taken together, these conditions yield the following formulas, which can be
-expressed using a constant `K`:
+To derive the second condition, consider the tail-drop model when the loss ratio
+is 2/3.
+
+Because the loss ratio is 2/3, the congestion window immediately before entering
+recovery is three times the full BDP:
 
 ~~~pseudocode
-K               = 11/18
+pre_recovery_cwnd = 3 * full_bdp
+~~~
+
+Let `x` be the number of newly acknowledged bytes, normalized by the full BDP,
+measured from the start of the recovery period. Because two bytes are newly
+declared lost for every byte that is newly acknowledged, after `x * full_bdp`
+bytes are acknowledged, bytes in flight is:
+
+~~~pseudocode
+bytes_in_flight = 3 * (1 - x) * full_bdp
+~~~
+
+Over the same interval, the congestion window is:
+
+~~~pseudocode
+cwnd = 3 * full_bdp * silence_factor
+      - x * full_bdp * ack_factor
+      - 2 * x * full_bdp * loss_factor
+~~~
+
+Rapid Start exits the silence period and resumes transmission when bytes in
+flight is no greater than the congestion window. Therefore, the resumption point
+is determined by:
+
+~~~pseudocode
+3 * (1 - x) * full_bdp
+  = 3 * full_bdp * silence_factor
+    - x * full_bdp * ack_factor
+    - 2 * x * full_bdp * loss_factor
+~~~
+
+
+Dividing by `3 * full_bdp` gives:
+
+~~~pseudocode
+1 - x = silence_factor
+        - (ack_factor / 3) * x
+        - (2 * loss_factor / 3) * x
+~~~
+
+The second condition requires the sender to resume transmission after `1 - beta`
+times the full BDP has been drained from the bottleneck queue. Under the
+assumptions above, that is equivalent to requiring the same resumption point as
+ordinary congestion avoidance after applying the multiplicative decrease factor
+`beta`, namely:
+
+~~~pseudocode
+x = 1 - beta
+~~~
+
+Substituting this relation, together with
+
+~~~pseudocode
+loss_factor = silence_factor = beta + ack_factor
+~~~
+
+into the previous equation yields:
+
+~~~pseudocode
+beta = beta + ack_factor
+       - (ack_factor / 3) * (1 - beta)
+       - (2 * (beta + ack_factor) / 3) * (1 - beta)
+~~~
+
+which simplifies to:
+
+~~~pseudocode
+ack_factor = (2 / 3) * (1 - beta)
+~~~
+
+Equivalently, using a constant `K`, the resulting formulas are:
+
+~~~pseudocode
+K               = 2/3
 silence_factor  = beta + K * (1 - beta)
 ack_factor      = K * (1 - beta)
 loss_factor     = beta + K * (1 - beta)
@@ -244,17 +372,17 @@ loss_factor     = beta + K * (1 - beta)
 Specifically, when `beta` is 0.5, the values are:
 
 ~~~pseudocode
-silence_factor  = 29/36
-ack_factor      = 11/36
-loss_factor     = 29/36
+silence_factor  = 5/6
+ack_factor      = 1/3
+loss_factor     = 5/6
 ~~~
 
 When `beta` is 0.7 (i.e., that of CUBIC {{?RFC9438}}), the values are:
 
 ~~~pseudocode
-silence_factor  = 53/60
-ack_factor      = 11/60
-loss_factor     = 53/60
+silence_factor  = 9/10
+ack_factor      = 1/5
+loss_factor     = 9/10
 ~~~
 
 
