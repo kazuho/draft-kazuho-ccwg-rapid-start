@@ -342,9 +342,11 @@ This appendix derives the reduction factors used by the recovery algorithm in
 
 Under a tail-drop model, let `full_bdp` be the path's full bandwidth-delay
 product. Let `bytes_acked` and `bytes_lost` be the number of newly acknowledged
-and newly declared lost bytes during a recovery period. Because bytes in flight
-immediately before recovery equals the sum of these values, the congestion
-window immediately before recovery is:
+and newly declared lost bytes during a recovery period. Assuming that the sender
+is congestion-window-limited when entering the recovery period, all bytes in
+flight at that point are either newly acknowledged or newly declared lost by the
+time the recovery period ends. Therefore, the congestion window immediately
+before entering recovery is:
 
 ~~~pseudocode
 pre_recovery_cwnd = bytes_acked + bytes_lost
@@ -388,14 +390,15 @@ or equivalently:
 loss_factor = silence_factor = beta + ack_factor
 ~~~
 
-To derive factors satisfying the second property, consider the tail-drop model
-when the loss ratio is 2/3. In the recovery algorithm of
-{{congestion-handling}}, the sender resumes transmission when the congestion
-window catches up with bytes in flight. Within its fixed-factor linear model,
-the silence period becomes longer as the loss ratio increases. Because Rapid
-Start uses at most a growth factor of 3, the largest loss ratio under this model
-is 2/3. Therefore, it is sufficient to derive the factors by considering that
-case.
+To derive factors satisfying the second requirement - that the silence period
+drainds at most `1 - beta` times the full BDP from the bottleneck queue,
+matching congestion avoidance - consider the tail-drop model when the loss ratio
+is 2/3. In the recovery algorithm of {{congestion-handling}}, the sender resumes
+transmission when the congestion window catches up with bytes in flight. Within
+its fixed-factor linear model, the silence period becomes longer as the loss
+ratio increases. Because Rapid Start uses at most a growth factor of 3, the
+largest loss ratio under this model is 2/3. Therefore, it is sufficient to
+derive the factors by considering that case.
 
 Because the loss ratio is 2/3, the congestion window immediately before entering
 recovery is three times the full BDP:
@@ -422,8 +425,9 @@ cwnd = 3 * full_bdp * silence_factor
 ~~~
 
 The sender resumes transmission once the congestion window catches up with bytes
-in flight. Because this is the worst case, satisfying the second property is
-equivalent to requiring that transmission resumes when:
+in flight. Because this case yields the longest silence period under the model,
+satisfying the second property is equivalent to requiring that transmission
+resumes when:
 
 ~~~pseudocode
 x = 1 - beta
