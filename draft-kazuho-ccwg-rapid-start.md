@@ -341,11 +341,11 @@ This appendix derives the reduction factors used by the recovery algorithm in
 {{congestion-handling}}.
 
 Under a tail-drop model, let `full_bdp` be the path's full bandwidth-delay
-product. Let `bytes_acked` and `bytes_lost` be the number of newly acknowledged
-and newly declared lost bytes during a recovery period. Assuming that the sender
-is congestion-window-limited when entering the recovery period, all bytes in
-flight at that point are either newly acknowledged or newly declared lost by the
-time the recovery period ends. Therefore, the congestion window immediately
+product. Let `bytes_acked` and `bytes_lost` denote the number of bytes newly
+acknowledged and newly declared lost during a recovery period. Assuming that the
+sender is congestion-window-limited when entering the recovery period, all bytes
+in flight at that point are either newly acknowledged or newly declared lost by
+the time the recovery period ends. Therefore, the congestion window immediately
 before entering recovery is:
 
 ~~~pseudocode
@@ -361,13 +361,13 @@ post_recovery_cwnd = pre_recovery_cwnd * silence_factor
                      - bytes_lost * loss_factor
 ~~~
 
-The first property of {{reduction-factors}} requires the post-recovery
-congestion window to equal `beta * full_bdp`, independent of the loss ratio.
-Under the tail-drop model, `bytes_acked = full_bdp`. Therefore, substituting
-these relations into the expression for `post_recovery_cwnd`:
+The first requirement of {{reduction-factors}} is that the post-recovery
+congestion window becomes `full_bdp * beta`, independent of the loss ratio.
+Under the tail-drop model, `bytes_acked = full_bdp`. Substituting these
+relations into the expression for `post_recovery_cwnd` gives:
 
 ~~~pseudocode
-beta * full_bdp
+full_bdp * beta
     = pre_recovery_cwnd * silence_factor
         - bytes_acked * ack_factor
         - bytes_lost * loss_factor
@@ -375,7 +375,7 @@ beta * full_bdp
         + bytes_lost * (silence_factor - loss_factor)
 ~~~
 
-For this expression to equal `beta * full_bdp` independent of the loss ratio,
+For this expression to equal `full_bdp * beta` independent of the loss ratio,
 the coefficient of `bytes_lost` has to be zero, and the coefficient of
 `bytes_acked` has to be `beta`. Therefore:
 
@@ -390,18 +390,18 @@ or equivalently:
 loss_factor = silence_factor = beta + ack_factor
 ~~~
 
-To derive factors satisfying the second requirement - that the silence period
+To derive factors satisfying the second requirement — that the silence period
 drains at most `1 - beta` times the full BDP from the bottleneck queue, matching
-congestion avoidance - consider the tail-drop model when the loss ratio is 2/3.
-In the recovery algorithm of {{congestion-handling}}, the sender resumes
-transmission when the congestion window catches up with bytes in flight. Within
-its fixed-factor linear model, the silence period becomes longer as the loss
-ratio increases. Because Rapid Start uses at most a growth factor of 3, the
-largest loss ratio under this model is 2/3. Therefore, it is sufficient to
-derive the factors by considering that case.
+congestion avoidance — it is sufficient to consider the case that yields the
+longest silence period. In the recovery algorithm of {{congestion-handling}},
+the sender resumes transmission when the congestion window catches up with bytes
+in flight. Under this recovery rule, the silence period becomes longer as the
+loss ratio increases. Because Rapid Start uses at most a growth factor of 3, the
+largest possible loss ratio is `2/3`, at which point the silence period is the
+longest.
 
-Because the loss ratio is 2/3, the congestion window immediately before entering
-recovery is three times the full BDP:
+Because the loss ratio is `2/3`, the congestion window immediately before
+entering recovery is three times the full BDP:
 
 ~~~pseudocode
 pre_recovery_cwnd = 3 * full_bdp
@@ -425,9 +425,8 @@ cwnd = 3 * full_bdp * silence_factor
 ~~~
 
 The sender resumes transmission once the congestion window catches up with bytes
-in flight. Because this case yields the longest silence period under the model,
-satisfying the second property is equivalent to requiring that transmission
-resumes when:
+in flight. Satisfying the second requirement therefore is equivalent to
+requiring that transmission resumes when:
 
 ~~~pseudocode
 x = 1 - beta
