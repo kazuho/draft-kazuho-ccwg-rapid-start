@@ -515,7 +515,7 @@ Appendix A.  Deriving the Reduction Factors
           - 2 * x * full_bdp * loss_factor
 
    The sender resumes transmission once the congestion window catches up
-   with bytes in flight.  Satisfying the second requirement therefore is
+   with bytes in flight.  Satisfying the second requirement is therefore
    equivalent to requiring that transmission resumes when:
 
    x = 1 - beta
