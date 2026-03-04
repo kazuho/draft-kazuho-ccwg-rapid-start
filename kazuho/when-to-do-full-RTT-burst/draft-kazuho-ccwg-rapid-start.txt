@@ -439,7 +439,7 @@ Table of Contents
 
 Appendix A.  Deriving the Reduction Factors
 
-   This apppendix derives the reduction factors specified in
+   This appendix derives the reduction factors specified in
    Section 3.3.1 and used by the recovery algorithm in Section 3.3.
 
    For the derivation, consider a tail-drop model in which packets are
