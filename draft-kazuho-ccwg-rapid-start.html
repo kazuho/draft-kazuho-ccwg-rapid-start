@@ -1056,7 +1056,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Oku</td>
-<td class="center">Expires 4 September 2026</td>
+<td class="center">Expires 5 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1069,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-kazuho-ccwg-rapid-start-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-03" class="published">3 March 2026</time>
+<time datetime="2026-03-04" class="published">4 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-04">4 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-05">5 September 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1127,7 +1127,7 @@ ordinary congestion avoidance.<a href="#section-abstract-1" class="pilcrow">¶</
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 4 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 5 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1389,19 +1389,18 @@ than under congestion avoidance, reducing the risk of underutilizing the link
 even when the congestion window must be reduced significantly to compensate for
 the aggressive ramp-up. The gradual reduction based on newly acknowledged and
 newly declared lost bytes also avoids burstiness when transmission resumes.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
-<p id="section-3.3-7">To avoid overly sharp reduction caused by losses other than tail drops, the
-sender <span class="bcp14">SHOULD NOT</span> reduce the congestion window below<a href="#section-3.3-7" class="pilcrow">¶</a></p>
+<p id="section-3.3-7">To avoid overly sharp reduction caused by losses other than those due to
+bottleneck queue overflow, the sender <span class="bcp14">SHOULD NOT</span> reduce the congestion window
+below<a href="#section-3.3-7" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3-8">
 <pre>
-pre_recovery_cwnd * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+pre_recovery_cwnd * beta / 3
 </pre><a href="#section-3.3-8" class="pilcrow">¶</a>
 </div>
 <p id="section-3.3-9">where <code>pre_recovery_cwnd</code> is the congestion window immediately before entering
-the recovery period. The coefficients 1/3 and 2/3 correspond to the
-acknowledged and lost fractions, respectively, when packets overflow the
-bottleneck queue at the largest growth factor (3×) that Rapid Start uses. With
-the reduction factors defined in <a href="#reduction-factors" class="auto internal xref">Section 3.3.1</a>, this lower bound
-simplifies to <code>pre_recovery_cwnd * beta / 3</code>.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
+the recovery period. This lower bound corresponds to the target window size
+under Rapid Start's most aggressive growth factor (3×), for which the
+pre-recovery congestion window is three times the full BDP.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
 <p id="section-3.3-10">Separately, the sender <span class="bcp14">MUST NOT</span> reduce the congestion window below the minima
 specified by <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>.<a href="#section-3.3-10" class="pilcrow">¶</a></p>
 <p id="section-3.3-11">The sender <span class="bcp14">MAY</span> stop reducing the congestion window once it reaches the initial

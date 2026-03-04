@@ -4,8 +4,8 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                            3 March 2026
-Expires: 4 September 2026
+Intended status: Standards Track                            4 March 2026
+Expires: 5 September 2026
 
 
                   Rapid Startup of Congestion Control
@@ -49,7 +49,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 September 2026.
+   This Internet-Draft will expire on 5 September 2026.
 
 Copyright Notice
 
@@ -242,18 +242,17 @@ Table of Contents
    acknowledged and newly declared lost bytes also avoids burstiness
    when transmission resumes.
 
-   To avoid overly sharp reduction caused by losses other than tail
-   drops, the sender SHOULD NOT reduce the congestion window below
+   To avoid overly sharp reduction caused by losses other than those due
+   to bottleneck queue overflow, the sender SHOULD NOT reduce the
+   congestion window below
 
-   pre_recovery_cwnd * (silence_factor - 1/3 * ack_factor - 2/3 * loss_factor)
+   pre_recovery_cwnd * beta / 3
 
    where pre_recovery_cwnd is the congestion window immediately before
-   entering the recovery period.  The coefficients 1/3 and 2/3
-   correspond to the acknowledged and lost fractions, respectively, when
-   packets overflow the bottleneck queue at the largest growth factor
-   (3×) that Rapid Start uses.  With the reduction factors defined in
-   Section 3.3.1, this lower bound simplifies to pre_recovery_cwnd *
-   beta / 3.
+   entering the recovery period.  This lower bound corresponds to the
+   target window size under Rapid Start's most aggressive growth factor
+   (3×), for which the pre-recovery congestion window is three times the
+   full BDP.
 
    Separately, the sender MUST NOT reduce the congestion window below
    the minima specified by [RFC5681] or [RFC9002].
