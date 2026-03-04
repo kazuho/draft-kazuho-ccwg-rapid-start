@@ -335,7 +335,7 @@ This document has no IANA actions.
 
 # Deriving the Reduction Factors {#derivation}
 
-This apppendix derives the reduction factors specified in {{reduction-factors}}
+This appendix derives the reduction factors specified in {{reduction-factors}}
 and used by the recovery algorithm in {{congestion-handling}}.
 
 For the derivation, consider a tail-drop model in which packets are lost only
