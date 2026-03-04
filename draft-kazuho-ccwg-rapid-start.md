@@ -24,13 +24,12 @@ informative:
 --- abstract
 
 This document defines Rapid Start, a congestion-control startup algorithm. It
-starts by pacing the transmission of the initial congestion window over a full
-RTT, allowing an initial window up to 2× that of classic paced slow start at a
-comparable sending rate. It then grows the window by 3× per RTT until queue
-buildup is observed, after which it reverts to classic 2× slow start growth.
-When congestion is signaled, Rapid Start smoothly converges the window based on
-delivered data, avoiding bursts and underutilization, before handing over to
-ordinary congestion avoidance.
+starts by pacing first full flight over a full RTT, allowing an initial window
+up to 2× that of classic paced slow start at a comparable sending rate. It then
+grows the window by 3× per RTT until queue buildup is observed, after which it
+reverts to classic 2× slow start growth. When congestion is signaled, Rapid
+Start smoothly converges the window based on delivered data, avoiding bursts and
+underutilization, before handing over to ordinary congestion avoidance.
 
 
 --- middle
@@ -97,10 +96,11 @@ aggressive transmission overshoots and congestion is signaled, Rapid Start
 compensates by reducing the congestion window as specified in
 {{congestion-handling}}.
 
-A sender using Careful Resume {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}}
-satisfies these recommendations, because it requires that all packets sent in
-its Unvalidated Phase be paced based on `current_rtt`, regardless of prior
-knowledge.
+Careful Resume {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}} provides a
+compatible way to realize these recommendations: it can defer entry to its
+Unvalidated Phase until the sender first sends more data than normal congestion
+control would permit, and it requires packets sent in that phase to be paced
+based on the current RTT.
 
 
 ## Increasing the Congestion Window
@@ -492,7 +492,7 @@ and (3) a recovery behavior that smoothly converges the congestion window.
 
 Careful Resume {{CAREFUL-RESUME}} provides a predecessor for (1): it paces the
 first flight over a full RTT, based on a current RTT estimate, to avoid bursts
-when (re)starting. Rapid Start applies the same full-RTT pacing principle during
+when (re)starting. Rapid Start applies the same full-RTT pacing principle when
 starting.
 
 "SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
