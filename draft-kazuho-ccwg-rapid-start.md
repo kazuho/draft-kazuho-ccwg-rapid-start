@@ -210,8 +210,10 @@ rules.
 
 ### Reduction Factors {#reduction-factors}
 
-Assuming that losses are caused only by overflow of the bottleneck queue, the
-recovery algorithm described in {{congestion-handling}} requires the following:
+The recovery algorithm described in {{congestion-handling}} uses reduction
+factors derived as functions of the window decrease factor `beta`. The
+derivation considers a recovery period in which packets are lost only due to
+overflow of the bottleneck queue, and requires the following:
 
 * The post-recovery congestion window becomes the full BDP multiplied by `beta`,
   independent of the loss ratio.
@@ -254,42 +256,66 @@ ack_factor      = 1/5
 loss_factor     = 9/10
 ~~~
 
+Because the factors are functions of `beta` alone, they can also be applied with
+a different window decrease factor when the recovery period is entered for a
+reason other than overflow of the bottleneck queue. When `beta` is 0.8 (i.e.,
+the recommended value of ABE {{?RFC8511}}), the factors become:
+
+~~~pseudocode
+silence_factor  = 14/15
+ack_factor      = 2/15
+loss_factor     = 14/15
+~~~
+
 {{derivation}} derives these formulas.
 
 
 ### Interaction with ECN
 
-{{reduction-factors}} provides the rationale for the recovery behavior in terms
-of the full BDP (which, under loss-based detection, is estimated by probing
-until the bottleneck queue overflows and packets are dropped). However, when
-congestion happens on an ECN-capable path, it can be reported via CE marks
-without requiring packet loss. If Rapid Start enters a recovery period due to a
-CE mark but no packets are lost, then it exits recovery with a congestion window
-that is beta times its size immediately before entering recovery.
+When congestion happens on an ECN-capable queue, it is typically reported via CE
+marks before packets are dropped. When Rapid Start enters the recovery period
+due to such a CE mark, it still adjusts the congestion window based on the bytes
+newly acknowledged or lost for each ACK received. Upon exiting the recovery
+period, the congestion window lands at beta times the amount of data that the
+path delivered in one round-trip, regardless of whether packets were dropped.
 
-If the growth factor in the last round-trip was 3×, the congestion window upon
-entering recovery can be larger than with 2×, and therefore the congestion
-window at the end of recovery (beta times the entry size) can also be larger.
-This makes the next recovery period start sooner, but otherwise does not change
-the flow's behavior under ECN-signaled congestion pressure.
+Rapid Start avoids bursty sending during recovery and therefore, in subsequent
+congestion events, the bottleneck queue is unlikely to grow past the point
+reached during startup ({{congestion-handling}}). Such events will likely be
+reported using CE marks rather than drops caused by queue overflow.
 
-The other concern is buffer overflow before CE feedback is observed. Under 3×
-growth, the sender might build up a bottleneck queue that is twice as large as
-under 2× growth. However, even in the extreme case where a network’s buffering
-margin is tightly provisioned for a target maximum RTT under conventional slow
-start (i.e., 2× growth), this larger queue buildup under 3× growth simply halves
-the loss-free RTT range: only connections with RTTs above half of that target
-maximum would be affected. In practice, networks do not generally provision
-buffers that tightly; with ECN, they can signal congestion without relying on
-drop, so leaving extra buffering margin typically has little downside. For these
-reasons, this overflow risk is limited in practice.
+If the growth factor in the last round-trip was 3×, more data is delivered
+during the recovery period than with 2×, and without packet drops the congestion
+window at the end of recovery can also be larger. This makes the bottleneck
+queue signal congestion using a CE mark and starts the next recovery period
+sooner, but otherwise does not change the flow's behavior under ECN-signaled
+congestion pressure.
+
+The other concern is the increased probability of bottleneck queue overflow
+before CE feedback is observed. Under 3× growth, the sender might build up a
+bottleneck queue that is twice as large as under 2× growth. However, even in the
+extreme case where a network’s buffering margin is tightly provisioned for a
+target maximum RTT under conventional slow start (i.e., 2× growth), this larger
+queue buildup under 3× growth simply halves the loss-free RTT range: only
+connections with RTTs above half of that target maximum would be affected. In
+practice, networks do not generally provision buffers that tightly; with ECN,
+they can signal congestion without relying on drop, so leaving extra buffering
+margin typically has little downside. For these reasons, this overflow risk is
+limited in practice.
 
 On loss-based paths, a more aggressive startup increases the likelihood of
 overflowing the bottleneck buffer and triggering packet drops, which delays
-delivery to the application due to retransmission. In contrast, on ECN-capable
-paths, congestion is typically signaled without relying on packet drops, so this
-loss-induced delivery delay mode is largely avoided. The benefits of faster
-growth of the congestion window are thus more reliable.
+delivery to the application due to retransmission. In contrast, when the
+bottleneck queue is ECN-capable, congestion is typically signaled without
+relying on packet drops, so this loss-induced delivery delay mode is largely
+avoided. The benefits of faster growth of the congestion window are thus more
+reliable.
+
+Rapid Start does not specify `beta`; the factors of {{reduction-factors}} are
+functions of whichever window decrease factor the sender uses. Because a CE mark
+is typically emitted before the bottleneck queue overflows, that factor can be
+less aggressive when recovery is entered due to a CE mark rather than a packet
+loss — for example, that of ABE ({{RFC8511}}).
 
 
 # Considerations
