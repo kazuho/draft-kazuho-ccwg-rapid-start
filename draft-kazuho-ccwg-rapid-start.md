@@ -272,12 +272,13 @@ loss_factor     = 14/15
 
 ### Interaction with ECN
 
-When congestion happens on an ECN-capable queue, it is typically reported via CE
-marks before packets are dropped. When Rapid Start enters the recovery period
-due to such a CE mark, it still adjusts the congestion window based on the bytes
-newly acknowledged or lost for each ACK received. Upon exiting the recovery
-period, the congestion window lands at beta times the amount of data that the
-path delivered in one round-trip, regardless of whether packets were dropped.
+When an ECN-capable queue becomes congested, congestion is typically reported
+via CE marks before packets are dropped. If Rapid Start enters the recovery
+period due to such a CE mark, it still adjusts the congestion window based on
+the bytes newly acknowledged or lost for each ACK received. Upon exiting the
+recovery period, the congestion window lands at beta times the amount of data
+that the path delivered in one round-trip, regardless of whether packets were
+dropped.
 
 Rapid Start avoids bursty sending during recovery and therefore, in subsequent
 congestion events, the bottleneck queue is unlikely to grow past the point
@@ -291,8 +292,8 @@ queue signal congestion using a CE mark and starts the next recovery period
 sooner, but otherwise does not change the flow's behavior under ECN-signaled
 congestion pressure.
 
-The other concern is the increased probability of bottleneck queue overflow
-before CE feedback is observed. Under 3× growth, the sender might build up a
+The other concern is the increased probability of overflowing the bottleneck
+queue before reacting to CE marks. Under 3× growth, the sender might build up a
 bottleneck queue that is twice as large as under 2× growth. However, even in the
 extreme case where a network’s buffering margin is tightly provisioned for a
 target maximum RTT under conventional slow start (i.e., 2× growth), this larger
