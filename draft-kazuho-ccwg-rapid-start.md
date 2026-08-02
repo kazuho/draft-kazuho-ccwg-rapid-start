@@ -285,12 +285,12 @@ congestion events, the bottleneck queue is unlikely to grow past the point
 reached during startup ({{congestion-handling}}). Such events will likely be
 reported using CE marks rather than drops caused by queue overflow.
 
-If the growth factor in the last round-trip was 3×, more data is delivered
-during the recovery period than with 2×, and without packet drops the congestion
-window at the end of recovery can also be larger. This makes the bottleneck
-queue signal congestion using a CE mark and starts the next recovery period
-sooner, but otherwise does not change the flow's behavior under ECN-signaled
-congestion pressure.
+If the growth factor in the last round-trip was 3×, the congestion window upon
+entering recovery can be larger than with 2×, and without packet drops the
+congestion window at the end of recovery can also be larger. This makes the
+bottleneck queue signal congestion using a CE mark and starts the next recovery
+period sooner, but otherwise does not change the flow's behavior under
+ECN-signaled congestion pressure.
 
 The other concern is the increased probability of overflowing the bottleneck
 queue before reacting to CE marks. Under 3× growth, the sender might build up a
