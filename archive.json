@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-02T02:46:35.193239+00:00",
+  "timestamp": "2026-08-04T02:30:23.046533+00:00",
   "repo": "kazuho/draft-kazuho-ccwg-rapid-start",
   "labels": [
     {
@@ -495,6 +495,34 @@
       "mergedBy": "kazuho",
       "mergeCommit": {
         "oid": "f9dd96661db662da5c07b3442f4afcc0f1e9b204"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 17,
+      "id": "PR_kwDOQNz9Nc75k3pE",
+      "title": "talk more about ECN: 1) explain how loss-after-CE is handled 2) refer to RFC 8511",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/17",
+      "state": "MERGED",
+      "author": "kazuho",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-08-02T06:33:59Z",
+      "updatedAt": "2026-08-03T00:44:37Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "f9dd96661db662da5c07b3442f4afcc0f1e9b204",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "kazuho/expand-ecn-desc",
+      "headRefOid": "a158fac87def9b30521bd6df6db7d3d53607553e",
+      "closedAt": "2026-08-03T00:44:37Z",
+      "mergedAt": "2026-08-03T00:44:37Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "1ceca99b56441f5d5ea226a21df1e2dfabadc308"
       },
       "comments": [],
       "reviews": []
