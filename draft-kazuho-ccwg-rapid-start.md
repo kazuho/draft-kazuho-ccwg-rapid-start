@@ -292,6 +292,28 @@ loss-induced delivery delay mode is largely avoided. The benefits of faster
 growth of the congestion window are thus more reliable.
 
 
+### Handing Over to CUBIC
+
+When CUBIC {{RFC9438}} is used, `W_max` is set upon exiting the recovery period.
+As Rapid Start leaves the congestion window at `beta` times the full BDP
+({{congestion-handling}}), Rapid Start's estimate of the full BDP is
+`cwnd / beta`.
+
+In network environments with competing flows, where fast convergence
+({{Section 4.7 of RFC9438}}) is enabled, `W_max` SHOULD be set to twice the
+estimated full BDP, the target that slow start would have reached had it
+overshot by a full factor of two. Adopting the smaller though more accurate
+estimate would leave the Rapid Start flow growing less rapidly than one that
+used slow start. If this slowly growing flow detects congestion before reaching
+`W_max`, fast convergence reduces `W_max` below the window actually achieved,
+amplifying the impact.
+
+In network environments with only a single flow and without any other traffic,
+`W_max` SHOULD instead be set to the estimated full BDP. Doing so lets the CUBIC
+curve converge toward the capacity that the path was just observed to have,
+avoiding overshoot immediately afterwards.
+
+
 # Considerations
 
 Rapid Start's startup and recovery behavior is driven by feedback from ACKs and
