@@ -15,6 +15,16 @@ author:
     org: Fastly
     email: kazuhooku@gmail.com
 
+ -
+    ins: M. Welzl
+    name: Michael Welzl
+    org: University of Oslo
+    street: PO Box 1080 Blindern
+    city: 0316  Oslo
+    country: Norway
+    email: michawe@ifi.uio.no
+    uri: http://welzl.at/
+    
 normative:
 
 informative:
