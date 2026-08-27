@@ -24,7 +24,7 @@ author:
     country: Norway
     email: michawe@ifi.uio.no
     uri: http://welzl.at/
-    
+
 normative:
 
 informative:
