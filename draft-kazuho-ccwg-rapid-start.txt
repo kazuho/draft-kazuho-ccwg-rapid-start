@@ -4,8 +4,9 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                           3 August 2026
-Expires: 4 February 2027
+Intended status: Standards Track                                M. Welzl
+Expires: 1 March 2027                                 University of Oslo
+                                                          28 August 2026
 
 
                   Rapid Startup of Congestion Control
@@ -49,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 February 2027.
+   This Internet-Draft will expire on 1 March 2027.
 
 Copyright Notice
 
@@ -84,7 +85,7 @@ Table of Contents
      7.2.  Informative References
    Appendix A.  Deriving the Reduction Factors
    Acknowledgments
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -619,7 +620,7 @@ Acknowledgments
    recovery behavior, allowing the congestion window to smoothly
    converge before handing over to congestion avoidance.
 
-Author's Address
+Authors' Addresses
 
    Kazuho Oku
    Fastly
@@ -629,3 +630,12 @@ Author's Address
 
       奥 一穂
       Fastly
+
+
+   Michael Welzl
+   University of Oslo
+   PO Box 1080 Blindern
+   0316  Oslo
+   Norway
+   Email: michawe@ifi.uio.no
+   URI:   http://welzl.at/

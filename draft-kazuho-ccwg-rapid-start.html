@@ -6,6 +6,7 @@
 <meta content="initial-scale=1.0" name="viewport">
 <title>Rapid Startup of Congestion Control</title>
 <meta content="奥 一穂 (Kazuho Oku)" name="author">
+<meta content="Michael Welzl" name="author">
 <meta content="
        This document defines Rapid Start, a congestion-control startup algorithm. It
 starts by pacing first full flight over a full RTT, allowing an initial window
@@ -20,14 +21,14 @@ underutilization, before handing over to ordinary congestion avoidance.
 <meta content="draft-kazuho-ccwg-rapid-start-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.34.0
-    Python 3.14.5
+    Python 3.14.7
     ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.1
+    platformdirs 4.11.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1050,8 +1051,8 @@ svg {
 <td class="right">August 2026</td>
 </tr></thead>
 <tfoot><tr>
-<td class="left">Oku</td>
-<td class="center">Expires 4 February 2027</td>
+<td class="left">Oku &amp; Welzl</td>
+<td class="center">Expires 1 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,18 +1065,22 @@ svg {
 <dd class="internet-draft">draft-kazuho-ccwg-rapid-start-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-03" class="published">3 August 2026</time>
+<time datetime="2026-08-28" class="published">28 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-04">4 February 2027</time></dd>
-<dt class="label-authors">Author:</dt>
+<dd class="expires"><time datetime="2027-03-01">1 March 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
       <div class="author-name">
 <span class="non-ascii">奥 一穂</span> (<span class="ascii">K. Oku</span>)</div>
 <div class="org">Fastly</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Welzl</div>
+<div class="org">University of Oslo</div>
 </div>
 </dd>
 </dl>
@@ -1121,7 +1126,7 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 4 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 1 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1210,7 +1215,7 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
             <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1817,8 +1822,8 @@ avoidance.<a href="#appendix-B-5" class="pilcrow">¶</a></p>
 </div>
 <div id="authors-addresses">
 <section id="appendix-C">
-      <h2 id="name-authors-address">
-<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
 <address class="vcard">
         <div class="ascii">
@@ -1833,6 +1838,21 @@ avoidance.<a href="#appendix-B-5" class="pilcrow">¶</a></p>
 <div class="non-ascii">
 <div dir="auto" class="left"><span class="fn nameRole">奥 一穂</span></div>
 <div dir="auto" class="left"><span class="org">Fastly</span></div>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Michael Welzl</span></div>
+<div dir="auto" class="left"><span class="org">University of Oslo</span></div>
+<div dir="auto" class="left"><span class="street-address">PO Box 1080 Blindern</span></div>
+<div dir="auto" class="left"><span class="locality">0316  Oslo</span></div>
+<div dir="auto" class="left"><span class="country-name">Norway</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:michawe@ifi.uio.no" class="email">michawe@ifi.uio.no</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="http://welzl.at/" class="url">http://welzl.at/</a>
 </div>
 </address>
 </section>
