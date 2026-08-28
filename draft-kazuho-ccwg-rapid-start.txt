@@ -76,6 +76,7 @@ Table of Contents
      3.3.  Congestion Handling
        3.3.1.  Reduction Factors
        3.3.2.  Interaction with ECN
+       3.3.3.  Handing Over to CUBIC
    4.  Considerations
      4.1.  Considerations for TCP
    5.  Security Considerations
@@ -375,6 +376,20 @@ Table of Contents
    overflows, that factor can be less aggressive when recovery is
    entered due to a CE mark rather than a packet loss — for example,
    that of ABE ([RFC8511]).
+
+3.3.3.  Handing Over to CUBIC
+
+   When CUBIC [RFC9438] is used, W_max is set upon exiting the recovery
+   period.  As Rapid Start leaves the congestion window at beta times
+   the full BDP (Section 3.3), Rapid Start's estimate of the full BDP is
+   cwnd / beta.
+
+   In network environments with competing flows, where fast convergence
+   (Section 4.7 of [RFC9438]) is enabled, W_max SHOULD be set to twice
+   the estimated full BDP, the target that slow start would have reached
+   had it overshot by a full factor of two.  Adopting the smaller though
+   more accurate estimate would leave the Rapid Start flow growing less
+   rapidly than one that used slow start.
 
 4.  Considerations
 

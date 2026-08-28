@@ -1179,6 +1179,9 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.2">
                     <p id="section-toc.1-1.3.2.3.2.2.1"><a href="#section-3.3.2" class="auto internal xref">3.3.2</a>.  <a href="#name-interaction-with-ecn" class="internal xref">Interaction with ECN</a></p>
 </li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.3">
+                    <p id="section-toc.1-1.3.2.3.2.3.1"><a href="#section-3.3.3" class="auto internal xref">3.3.3</a>.  <a href="#name-handing-over-to-cubic" class="internal xref">Handing Over to CUBIC</a></p>
+</li>
                 </ul>
 </li>
             </ul>
@@ -1522,6 +1525,23 @@ functions of whichever window decrease factor the sender uses. Because a CE mark
 is typically emitted before the bottleneck queue overflows, that factor can be
 less aggressive when recovery is entered due to a CE mark rather than a packet
 loss — for example, that of ABE (<span>[<a href="#RFC8511" class="cite xref">RFC8511</a>]</span>).<a href="#section-3.3.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="handing-over-to-cubic">
+<section id="section-3.3.3">
+          <h4 id="name-handing-over-to-cubic">
+<a href="#section-3.3.3" class="section-number selfRef">3.3.3. </a><a href="#name-handing-over-to-cubic" class="section-name selfRef">Handing Over to CUBIC</a>
+          </h4>
+<p id="section-3.3.3-1">When CUBIC <span>[<a href="#RFC9438" class="cite xref">RFC9438</a>]</span> is used, <code>W_max</code> is set upon exiting the recovery period.
+As Rapid Start leaves the congestion window at <code>beta</code> times the full BDP
+(<a href="#congestion-handling" class="auto internal xref">Section 3.3</a>), Rapid Start's estimate of the full BDP is
+<code>cwnd / beta</code>.<a href="#section-3.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.3-2">In network environments with competing flows, where fast convergence
+(<span><a href="https://rfc-editor.org/rfc/rfc9438#section-4.7" class="relref">Section 4.7</a> of [<a href="#RFC9438" class="cite xref">RFC9438</a>]</span>) is enabled, <code>W_max</code> <span class="bcp14">SHOULD</span> be set to twice the
+estimated full BDP, the target that slow start would have reached had it
+overshot by a full factor of two. Adopting the smaller though more accurate
+estimate would leave the Rapid Start flow growing less rapidly than one that
+used slow start.<a href="#section-3.3.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
