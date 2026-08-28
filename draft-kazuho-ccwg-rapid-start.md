@@ -304,14 +304,8 @@ In network environments with competing flows, where fast convergence
 estimated full BDP, the target that slow start would have reached had it
 overshot by a full factor of two. Adopting the smaller though more accurate
 estimate would leave the Rapid Start flow growing less rapidly than one that
-used slow start. If this slowly growing flow detects congestion before reaching
-`W_max`, fast convergence reduces `W_max` below the window actually achieved,
-amplifying the impact.
+used slow start.
 
-In network environments with only a single flow and without any other traffic,
-`W_max` SHOULD instead be set to the estimated full BDP. Doing so lets the CUBIC
-curve converge toward the capacity that the path was just observed to have,
-avoiding overshoot immediately afterwards.
 
 
 # Considerations
