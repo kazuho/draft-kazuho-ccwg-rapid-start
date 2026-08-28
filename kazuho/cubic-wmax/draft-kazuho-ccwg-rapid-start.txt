@@ -4,8 +4,8 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                          25 August 2026
-Expires: 26 February 2027
+Intended status: Standards Track                          28 August 2026
+Expires: 1 March 2027
 
 
                   Rapid Startup of Congestion Control
@@ -49,7 +49,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 February 2027.
+   This Internet-Draft will expire on 1 March 2027.
 
 Copyright Notice
 
@@ -361,15 +361,7 @@ Table of Contents
    the estimated full BDP, the target that slow start would have reached
    had it overshot by a full factor of two.  Adopting the smaller though
    more accurate estimate would leave the Rapid Start flow growing less
-   rapidly than one that used slow start.  If this slowly growing flow
-   detects congestion before reaching W_max, fast convergence reduces
-   W_max below the window actually achieved, amplifying the impact.
-
-   In network environments with only a single flow and without any other
-   traffic, W_max SHOULD instead be set to the estimated full BDP.
-   Doing so lets the CUBIC curve converge toward the capacity that the
-   path was just observed to have, avoiding overshoot immediately
-   afterwards.
+   rapidly than one that used slow start.
 
 4.  Considerations
 
