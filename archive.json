@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-27T07:48:08.884032+00:00",
+  "timestamp": "2026-08-30T03:56:13.839301+00:00",
   "repo": "kazuho/draft-kazuho-ccwg-rapid-start",
   "labels": [
     {
@@ -57,14 +57,36 @@
       "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/issues/19",
       "state": "OPEN",
       "author": "mwelzl",
-      "authorAssociation": "NONE",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The appendix says:\n\n> Under the derivation assumptions, the bytes newly acknowledged during recovery equal one full BDP, i.e., bytes_acked = full_bdp.\n\n\nI would say this is true for the first RTT of recovery. Ideally, recovery shouldn\u2019t take much longer - but it might\u2026 and then this metric might go wrong. Thinking of RACK's way of dealing with recovery by keeping track of the transmission time, I believe that bytes_acked here should be limited to only the bytes acknowledged during recovery whose first transmission timestamp precedes the time of entering recovery.\n",
       "createdAt": "2026-08-26T11:55:12Z",
-      "updatedAt": "2026-08-26T11:55:12Z",
+      "updatedAt": "2026-08-28T09:19:17Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "kazuho",
+          "authorAssociation": "OWNER",
+          "body": "Thanks, and oh this sounds like a primarily TCP-specific issue.\n\nIn QUIC, packets are never retransmitted; lost information are resent using new packets with new packet numbers. There can nevertheless be boundary effects. A packet sent shortly before recovery begins might not be declared lost until after recovery ends because of the packet-number or time threshold. Conversely, if packets sent immediately after recovery begins are lost, the ACK that ends recovery might also cause those packets to be declared lost, and they could incorrectly be included in bytes_newly_lost. ACKed bytes carried by that final ACK present a similar processing-order question.\n\nPerhaps we should first define the transport-independent rule: bytes_newly_acked and bytes_newly_lost SHOULD include only packets that were in flight upon entering recovery. We could then provide transport-specific guidance for identifying that set. For QUIC this is straightforward; for TCP, I expect that additional guidance or approximation might be necessary.",
+          "createdAt": "2026-08-28T09:02:13Z",
+          "updatedAt": "2026-08-28T09:02:13Z"
+        },
+        {
+          "author": "mwelzl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ahhh I see.... I need to think differently here   :-)    and I'm all for sticking with QUIC for this draft, at least for now - also for other reasons (e.g. the recommendation to pace).\n\nBut even then, I wonder if the statement is correct. What if data are lost again in recovery? Then recovery might not end and send more data, right?",
+          "createdAt": "2026-08-28T09:12:14Z",
+          "updatedAt": "2026-08-28T09:12:14Z"
+        },
+        {
+          "author": "mwelzl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Sorry, I think you already confirmed this - losing packets in recovery could mess with this heuristic. You say:\n> Perhaps we should first define the transport-independent rule: bytes_newly_acked and bytes_newly_lost SHOULD include only packets that were in flight upon entering recovery.\n\nIndeed - in QUIC this is straightforward due to sequence numbers, but in TCP it isn't hard either when using packet timestamps as RACK does, one just needs to keep track of transmission times. All of these packets were sent before entering recovery.",
+          "createdAt": "2026-08-28T09:19:01Z",
+          "updatedAt": "2026-08-28T09:19:17Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -549,31 +571,47 @@
       "id": "PR_kwDOQNz9Nc8AAAABA67SZQ",
       "title": "[cubic] specify W_max to be set",
       "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/18",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "kazuho",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "The obvious answer is to set W_max to the full BDP estimate measured by Rapid Start.\r\n\r\nHowever, when competing flows exist, adopting the full BDP estimate makes the flow less aggressive than flows that used slow start, which adopt an estimate twice as large when slow start fully overshot. To compensate for that, the PR recommends adopting 2x full BDP estimate - a value on par with slow start - as W_max, when competing flows exist and hence fast convergence is active.\r\n\r\nThe charts below are from an experiment on a simulator: https://github.com/h2o/quicly/tree/experiment/newcomer-startup\r\n\r\nThey show the share of bandwidth taken by the newcomer across time. Bold lines are the median, dotted lines are the 10th and 90th percentiles. All runs used Rapid Start's IW of 60. \r\n\r\nCompare the purple line (traditional slow start) and the blue line (Rapid Start setting W_max to full BDP estimate). As can be seen, on long, fat networks (5G, LTE), the negative impact of not growing early persists. Disabling the entry to fast convergence in the first CA recovery (the green line) sometimes moves the needle, but not always. Setting W_max to 2x the estimate (the red line) trails the slow start curve better across these simulator runs.\r\n\r\n<img width=\"1800\" height=\"950\" alt=\"newcomer-startup-5g\" src=\"https://github.com/user-attachments/assets/f6852490-09e0-409e-bac2-d81cf94976e1\" />\r\n<img width=\"1800\" height=\"950\" alt=\"newcomer-startup-lte\" src=\"https://github.com/user-attachments/assets/d6a3615a-d99c-4e0d-91c0-b577d1ddd712\" />\r\n<img width=\"1800\" height=\"950\" alt=\"newcomer-startup-dsl\" src=\"https://github.com/user-attachments/assets/4f8453f9-665d-4c4f-aa9a-d8a77d0c7e4d\" />\r\n<img width=\"1800\" height=\"950\" alt=\"newcomer-startup-half-dsl\" src=\"https://github.com/user-attachments/assets/02846e0c-4aa1-402e-8f47-8ca193c8eddb\" />\r\n<img width=\"1800\" height=\"950\" alt=\"newcomer-startup-quarter-dsl\" src=\"https://github.com/user-attachments/assets/7f945365-4b49-4ac8-a600-6a8ee6755632\" />\r\n<img width=\"1800\" height=\"950\" alt=\"newcomer-startup-eighth-dsl\" src=\"https://github.com/user-attachments/assets/7aafe670-e479-4c09-9ac0-1925194c0081\" />\r\n\r\nThe downside of setting Wmax to 2x BDP is that, when there were no competing flows, the flow exits the first CA period at an earlier moment than when adopting 1x BDP. However, the first CA period still persists for a handful of round-trips, and that is much better than not doing the Rapid-Start-style reduction at all.\r\n\r\n<img width=\"1200\" height=\"1064\" alt=\"simulator-plot-20260825191344\" src=\"https://github.com/user-attachments/assets/063794be-c16c-4ff4-9570-20352f5ee464\" />\r\n<img width=\"1200\" height=\"1064\" alt=\"simulator-plot-20260825191335\" src=\"https://github.com/user-attachments/assets/5dee40f0-d2f8-4d99-bcf7-573f7457fd45\" />\r\n",
       "createdAt": "2026-08-25T10:17:44Z",
-      "updatedAt": "2026-08-26T12:18:21Z",
+      "updatedAt": "2026-08-28T08:45:31Z",
       "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
       "baseRefName": "main",
       "baseRefOid": "1ceca99b56441f5d5ea226a21df1e2dfabadc308",
       "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
       "headRefName": "kazuho/cubic-wmax",
-      "headRefOid": "f414212a14a41cb5c958175a2143e2a2b5bb8a02",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "80a4d243f9edb06116ee510564a5e05a1131a666",
+      "closedAt": "2026-08-28T08:45:31Z",
+      "mergedAt": "2026-08-28T08:45:31Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "24bb1e602c519818e397b70bbb7b0aa8ee52157c"
+      },
       "comments": [
         {
           "author": "mwelzl",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "body": "Where does \"Rapid Start's IW of 60\" come from? The draft says the IW can be up to 2x the one of \"classic paced slow start\", i.e. 2*10 = 20, I guess?\r\n\r\nAlso, regarding the downside with only one flow, I think that comes from the value of beta in the first back-off. The \"ideal\" value in this corner case will depend on the length of the transmission, which isn't normally known to TCP and probably nothing we should try to optimize for. So, I think that's best ignored.",
           "createdAt": "2026-08-26T12:08:10Z",
           "updatedAt": "2026-08-26T12:08:10Z"
+        },
+        {
+          "author": "kazuho",
+          "authorAssociation": "OWNER",
+          "body": "Thank you for the review! Applied.\r\n\r\nFWIW, you can shift-click the line numbers to select multiple lines and provide suggestions for all of them at once.",
+          "createdAt": "2026-08-28T08:06:32Z",
+          "updatedAt": "2026-08-28T08:06:32Z"
+        },
+        {
+          "author": "mwelzl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Thank you for the review! Applied.\r\n> \r\n> FWIW, you can shift-click the line numbers to select multiple lines and provide suggestions for all of them at once.\r\n\r\nThanks!! Obviously I didn't know  :-)",
+          "createdAt": "2026-08-28T08:09:38Z",
+          "updatedAt": "2026-08-28T08:09:38Z"
         }
       ],
       "reviews": [
@@ -583,7 +621,7 @@
             "abbreviatedOid": "f414212"
           },
           "author": "mwelzl",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "CHANGES_REQUESTED",
           "body": "I just suggest to remove some text  :-)",
           "createdAt": "2026-08-26T12:15:23Z",
@@ -632,8 +670,57 @@
               "updatedAt": "2026-08-26T12:18:21Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOQNz9Nc8AAAABLPcsqg",
+          "commit": {
+            "abbreviatedOid": "80a4d24"
+          },
+          "author": "mwelzl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-08-28T08:34:54Z",
+          "updatedAt": "2026-08-28T08:34:54Z",
+          "comments": []
         }
       ]
+    },
+    {
+      "number": 20,
+      "id": "PR_kwDOQNz9Nc8AAAABBOQeFw",
+      "title": "Add myself :-)",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/20",
+      "state": "MERGED",
+      "author": "mwelzl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-08-27T15:00:49Z",
+      "updatedAt": "2026-08-28T08:03:20Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "1ceca99b56441f5d5ea226a21df1e2dfabadc308",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "mw-add-myself",
+      "headRefOid": "e69090f695518e782a066d68922a24804d070dc8",
+      "closedAt": "2026-08-28T08:03:13Z",
+      "mergedAt": "2026-08-28T08:03:13Z",
+      "mergedBy": "kazuho",
+      "mergeCommit": {
+        "oid": "da8d275d27fadc3996b2c1a7e6f741ffd0ecae35"
+      },
+      "comments": [
+        {
+          "author": "kazuho",
+          "authorAssociation": "OWNER",
+          "body": "Thank you and welcome!",
+          "createdAt": "2026-08-28T08:03:20Z",
+          "updatedAt": "2026-08-28T08:03:20Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
