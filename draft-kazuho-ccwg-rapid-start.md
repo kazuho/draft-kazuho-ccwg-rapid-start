@@ -53,7 +53,7 @@ window and use an exponential startup (“slow start”;
 bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:
 
-* Senders commonly pace the initial window at a rate of `N * congestion_window / smoothed_rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
+* Senders commonly pace the initial window at a rate of `N * initial window / smoothed rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
   pausing. When the bottleneck bandwidth is higher than the paced rate, the
   bottleneck can remain idle for the other half of each RTT.
 * When the initial window is much smaller than the path BDP, many round-trips
@@ -66,7 +66,7 @@ underutilization during the startup.
 
 Rapid Start retains the initial-window-based probing model but mitigates these
 issues. It paces the initial window over a full estimated RTT. This allows to transmit an
-initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of `2 * congestion_window / smoothed_rtt`, resulting in data transmission for roughly half the RTT.
+initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of `2 * initial window / smoothed rtt`, resulting in data transmission for roughly half the RTT.
 Rapid Start then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
@@ -92,7 +92,7 @@ This section describes the algorithm used by Rapid Start.
 
 ### Initial Window
 
-A sender SHOULD pace the initial window over the full RTT, at no more than the rate that classic paced slow start would use with the ordinary initial window. This can be attained by pacing at a rate of `initial_window / smoothed_rtt`, using an initial window that is twice as large as the initial window of classic paced slow start.
+A sender SHOULD pace the initial window over the full RTT, at no more than the rate that classic paced slow start would use with the ordinary initial window. This can be attained by pacing at a rate of `initial_window / smoothed_rtt`, using an initial window that is up to twice as large as the initial window of classic paced slow start.
 
 Careful Resume {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}} provides a
 compatible way to realize these recommendations: it can defer entry to its
@@ -102,8 +102,7 @@ based on the current RTT.
 
 ### Later Rounds
 
-Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
-make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT.
+Rapid Start uses a larger growth factor than classic slow start. Such growth can make the sender observe a bottleneck queue overflow earlier than with the common 2× growth factor. To make it more likely that Rapid Start will saturate the path's capacity despite its larger growth factor, the sender ought to pace the packets over the full RTT.
 
 If this more
 aggressive transmission overshoots and congestion is signaled, Rapid Start
@@ -164,7 +163,7 @@ during recovery.
 
 When entering the recovery period, the sender slightly scales down the current
 congestion window using a silence factor. As a result of this reduction,
-sending is momentarily blocked until the amount of bytes in flight is no greater than the
+sending is momentarily blocked until the number of bytes in flight is no greater than the
 reduced congestion window, allowing the bottleneck queue to be drained by a
 controlled amount.
 
@@ -323,8 +322,7 @@ reliable.
 
 Rapid Start does not specify `beta`; the factors of {{reduction-factors}} are
 functions of whichever window decrease factor the sender uses. Because a CE mark
-is typically emitted before the bottleneck queue overflows, that factor can be
-less aggressive when recovery is entered due to a CE mark rather than a packet
+is typically emitted before the bottleneck queue overflows, the value for `beta` can be larger when recovery is entered due to a CE mark rather than a packet
 loss — for example, that of ABE ({{RFC8511}}).
 
 
