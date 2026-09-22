@@ -6,32 +6,32 @@
 <meta content="initial-scale=1.0" name="viewport">
 <title>Rapid Startup of Congestion Control</title>
 <meta content="奥 一穂 (Kazuho Oku)" name="author">
+<meta content="Michael Welzl" name="author">
 <meta content="
        This document defines Rapid Start, a congestion-control startup algorithm. It
-starts by pacing first full flight over a full RTT, allowing an initial window
-up to 2× that of classic paced slow start at a comparable sending rate. It then
+starts by pacing first full flight over a full RTT. It then
 grows the window by 3× per RTT until queue buildup is observed, after which it
 reverts to classic 2× slow start growth. When congestion is signaled, Rapid
 Start smoothly converges the window based on delivered data, avoiding bursts and
 underutilization, before handing over to ordinary congestion avoidance. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="internet-draft" name="keyword">
 <meta content="draft-kazuho-ccwg-rapid-start-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
-    Python 3.14.5
-    ConfigArgParse 1.7.5
+  xml2rfc 3.34.1
+    Python 3.14.7
+    ConfigArgParse 1.7.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.1
+    platformdirs 4.11.10
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.2
+    wcwidth 0.8.4
 -->
 <link href="draft-kazuho-ccwg-rapid-start.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1047,11 +1047,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Rapid Startup of Congestion Control</td>
-<td class="right">August 2026</td>
+<td class="right">September 2026</td>
 </tr></thead>
 <tfoot><tr>
-<td class="left">Oku</td>
-<td class="center">Expires 4 February 2027</td>
+<td class="left">Oku &amp; Welzl</td>
+<td class="center">Expires 26 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,18 +1064,22 @@ svg {
 <dd class="internet-draft">draft-kazuho-ccwg-rapid-start-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-03" class="published">3 August 2026</time>
+<time datetime="2026-09-22" class="published">22 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-04">4 February 2027</time></dd>
-<dt class="label-authors">Author:</dt>
+<dd class="expires"><time datetime="2027-03-26">26 March 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
       <div class="author-name">
 <span class="non-ascii">奥 一穂</span> (<span class="ascii">K. Oku</span>)</div>
 <div class="org">Fastly</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Welzl</div>
+<div class="org">University of Oslo</div>
 </div>
 </dd>
 </dl>
@@ -1084,8 +1088,7 @@ svg {
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This document defines Rapid Start, a congestion-control startup algorithm. It
-starts by pacing first full flight over a full RTT, allowing an initial window
-up to 2× that of classic paced slow start at a comparable sending rate. It then
+starts by pacing first full flight over a full RTT. It then
 grows the window by 3× per RTT until queue buildup is observed, after which it
 reverts to classic 2× slow start growth. When congestion is signaled, Rapid
 Start smoothly converges the window based on delivered data, avoiding bursts and
@@ -1121,7 +1124,7 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 4 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1160,7 +1163,7 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-algorithm" class="internal xref">Algorithm</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
-                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-full-rtt-pacing" class="internal xref">Full-RTT Pacing</a></p>
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-full-rtt-pacing-of-the-init" class="internal xref">Full-RTT Pacing of the Initial Window</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
                 <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-increasing-the-congestion-w" class="internal xref">Increasing the Congestion Window</a></p>
@@ -1173,6 +1176,9 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.2">
                     <p id="section-toc.1-1.3.2.3.2.2.1"><a href="#section-3.3.2" class="auto internal xref">3.3.2</a>.  <a href="#name-interaction-with-ecn" class="internal xref">Interaction with ECN</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.3">
+                    <p id="section-toc.1-1.3.2.3.2.3.1"><a href="#section-3.3.3" class="auto internal xref">3.3.3</a>.  <a href="#name-handing-over-to-cubic" class="internal xref">Handing Over to CUBIC</a></p>
 </li>
                 </ul>
 </li>
@@ -1210,7 +1216,7 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
             <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1229,25 +1235,24 @@ bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:<a href="#section-1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1-2.1">
-          <p id="section-1-2.1.1">The sender typically starts by pacing packets for half an RTT and then
+          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of N * congestion_window / smoothed_rtt (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>, or TCP for initial windows exceeding 10 in the Linux kernel <span>[<a href="#I-D.draft-welzl-iccrg-pacing" class="cite xref">I-D.draft-welzl-iccrg-pacing</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
 pausing. When the bottleneck bandwidth is higher than the paced rate, the
 bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-2.2">
-          <p id="section-1-2.2.1">Even when the bottleneck is being utilized, utilization remains below capacity
-until queueing begins.<a href="#section-1-2.2.1" class="pilcrow">¶</a></p>
+          <p id="section-1-2.2.1">When the initial window is much smaller than the path BDP, many round-trips
+are required to ramp up.<a href="#section-1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-2.3">
-          <p id="section-1-2.3.1">When the initial window is much smaller than the path BDP, many round-trips
-are required to ramp up.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
+          <p id="section-1-2.3.1">When slow start overshoots, pacing can make it likely for a common back-off factor of 0.5 or more to cause double losses <span>[<a href="#I-D.draft-welzl-iccrg-pacing" class="cite xref">I-D.draft-welzl-iccrg-pacing</a>]</span>.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-3">These effects are particularly detrimental to short-lived flows, which may only
 have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Rapid Start retains the initial-window-based probing model but mitigates these
-issues. It paces the first full flight over a full estimated RTT, allowing an
-initial window up to 2× that of classic slow start at a comparable pacing rate.
+issues. It paces the first full flight over a full estimated RTT. This allows an
+initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the first full flight at a rate of 2 * congestion_window / smoothed_rtt.
 It then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
@@ -1276,20 +1281,20 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-algorithm" class="section-name selfRef">Algorithm</a>
       </h2>
 <p id="section-3-1">This section describes the algorithm used by Rapid Start.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<div id="full-rtt-pacing">
+<div id="full-rtt-pacing-of-the-initial-window">
 <section id="section-3.1">
-        <h3 id="name-full-rtt-pacing">
-<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-full-rtt-pacing" class="section-name selfRef">Full-RTT Pacing</a>
+        <h3 id="name-full-rtt-pacing-of-the-init">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-full-rtt-pacing-of-the-init" class="section-name selfRef">Full-RTT Pacing of the Initial Window</a>
         </h3>
-<p id="section-3.1-1">Rapid Start uses a more aggressive growth factor than classic slow start. When
-such growth is used, sending the initial congestion window as a short burst can
+<p id="section-3.1-1">Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
 make the sender observe a bottleneck overflow earlier than it would under evenly
 paced transmission. To ensure that Rapid Start observes the path's queueing
-behavior rather than sender-side burstiness, the sender <span class="bcp14">SHOULD</span> pace the packets
+behavior rather than the effect of sender-side burstiness, the sender ought to pace the packets
 over a full RTT, using the current RTT estimate, when it first sends more data
 than classic slow start with pacing would permit.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.1-2">By pacing the packets over a full RTT, Rapid Start can use an initial window up
-to 2× that of classic slow start with pacing; spreading the transmission over a
+<p id="section-3.1-2">A sender <span class="bcp14">SHOULD</span> pace the initial flight at no more than the rate that classic paced slow start would use with the ordinary initial window, without increasing the burst allowance.
+By pacing these packets over a full RTT instead of the common half-RTT implementation, Rapid Start can use an initial window up
+to 2× that of classic paced slow start. over a
 full RTT (rather than half an RTT) yields a comparable pacing rate. If this more
 aggressive transmission overshoots and congestion is signaled, Rapid Start
 compensates by reducing the congestion window as specified in
@@ -1519,6 +1524,23 @@ less aggressive when recovery is entered due to a CE mark rather than a packet
 loss — for example, that of ABE (<span>[<a href="#RFC8511" class="cite xref">RFC8511</a>]</span>).<a href="#section-3.3.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="handing-over-to-cubic">
+<section id="section-3.3.3">
+          <h4 id="name-handing-over-to-cubic">
+<a href="#section-3.3.3" class="section-number selfRef">3.3.3. </a><a href="#name-handing-over-to-cubic" class="section-name selfRef">Handing Over to CUBIC</a>
+          </h4>
+<p id="section-3.3.3-1">When CUBIC <span>[<a href="#RFC9438" class="cite xref">RFC9438</a>]</span> is used, <code>W_max</code> is set upon exiting the recovery period.
+As Rapid Start leaves the congestion window at <code>beta</code> times the full BDP
+(<a href="#congestion-handling" class="auto internal xref">Section 3.3</a>), Rapid Start's estimate of the full BDP is
+<code>cwnd / beta</code>.<a href="#section-3.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.3-2">In network environments with competing flows, where fast convergence
+(<span><a href="https://rfc-editor.org/rfc/rfc9438#section-4.7" class="relref">Section 4.7</a> of [<a href="#RFC9438" class="cite xref">RFC9438</a>]</span>) is enabled, <code>W_max</code> <span class="bcp14">SHOULD</span> be set to twice the
+estimated full BDP, the target that slow start would have reached had it
+overshot by a full factor of two. Adopting the smaller though more accurate
+estimate would leave the Rapid Start flow growing less rapidly than one that
+used slow start.<a href="#section-3.3.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 </section>
@@ -1609,6 +1631,10 @@ required delivered/lost byte accounting can be approximated robustly.<a href="#s
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="I-D.draft-welzl-iccrg-pacing">[I-D.draft-welzl-iccrg-pacing]</dt>
+        <dd>
+<span class="refAuthor">Welzl, M.</span>, <span class="refAuthor">Eddy, W.</span>, <span class="refAuthor">Goel, V.</span>, and <span class="refAuthor">M. Tüxen</span>, <span class="refTitle">"Pacing in Transport Protocols"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-welzl-iccrg-pacing-03</span>, <time datetime="2025-07-07" class="refDate">7 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-pacing-03">https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-pacing-03</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC6582">[RFC6582]</dt>
         <dd>
 <span class="refAuthor">Henderson, T.</span>, <span class="refAuthor">Floyd, S.</span>, <span class="refAuthor">Gurtov, A.</span>, and <span class="refAuthor">Y. Nishida</span>, <span class="refTitle">"The NewReno Modification to TCP's Fast Recovery Algorithm"</span>, <span class="seriesInfo">RFC 6582</span>, <span class="seriesInfo">DOI 10.17487/RFC6582</span>, <time datetime="2012-04" class="refDate">April 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6582">https://www.rfc-editor.org/rfc/rfc6582</a>&gt;</span>. </dd>
@@ -1817,8 +1843,8 @@ avoidance.<a href="#appendix-B-5" class="pilcrow">¶</a></p>
 </div>
 <div id="authors-addresses">
 <section id="appendix-C">
-      <h2 id="name-authors-address">
-<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
 <address class="vcard">
         <div class="ascii">
@@ -1833,6 +1859,21 @@ avoidance.<a href="#appendix-B-5" class="pilcrow">¶</a></p>
 <div class="non-ascii">
 <div dir="auto" class="left"><span class="fn nameRole">奥 一穂</span></div>
 <div dir="auto" class="left"><span class="org">Fastly</span></div>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Michael Welzl</span></div>
+<div dir="auto" class="left"><span class="org">University of Oslo</span></div>
+<div dir="auto" class="left"><span class="street-address">PO Box 1080 Blindern</span></div>
+<div dir="auto" class="left"><span class="locality">0316  Oslo</span></div>
+<div dir="auto" class="left"><span class="country-name">Norway</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:michawe@ifi.uio.no" class="email">michawe@ifi.uio.no</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="http://welzl.at/" class="url">http://welzl.at/</a>
 </div>
 </address>
 </section>

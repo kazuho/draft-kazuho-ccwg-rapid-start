@@ -4,8 +4,9 @@
 
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
-Intended status: Standards Track                           3 August 2026
-Expires: 4 February 2027
+Intended status: Standards Track                                M. Welzl
+Expires: 26 March 2027                                University of Oslo
+                                                       22 September 2026
 
 
                   Rapid Startup of Congestion Control
@@ -14,14 +15,12 @@ Expires: 4 February 2027
 Abstract
 
    This document defines Rapid Start, a congestion-control startup
-   algorithm.  It starts by pacing first full flight over a full RTT,
-   allowing an initial window up to 2× that of classic paced slow start
-   at a comparable sending rate.  It then grows the window by 3× per RTT
-   until queue buildup is observed, after which it reverts to classic 2×
-   slow start growth.  When congestion is signaled, Rapid Start smoothly
-   converges the window based on delivered data, avoiding bursts and
-   underutilization, before handing over to ordinary congestion
-   avoidance.
+   algorithm.  It starts by pacing first full flight over a full RTT.
+   It then grows the window by 3× per RTT until queue buildup is
+   observed, after which it reverts to classic 2× slow start growth.
+   When congestion is signaled, Rapid Start smoothly converges the
+   window based on delivered data, avoiding bursts and underutilization,
+   before handing over to ordinary congestion avoidance.
 
 Discussion Venues
 
@@ -49,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 February 2027.
+   This Internet-Draft will expire on 26 March 2027.
 
 Copyright Notice
 
@@ -70,11 +69,12 @@ Table of Contents
    1.  Introduction
    2.  Conventions and Definitions
    3.  Algorithm
-     3.1.  Full-RTT Pacing
+     3.1.  Full-RTT Pacing of the Initial Window
      3.2.  Increasing the Congestion Window
      3.3.  Congestion Handling
        3.3.1.  Reduction Factors
        3.3.2.  Interaction with ECN
+       3.3.3.  Handing Over to CUBIC
    4.  Considerations
      4.1.  Considerations for TCP
    5.  Security Considerations
@@ -84,7 +84,7 @@ Table of Contents
      7.2.  Informative References
    Appendix A.  Deriving the Reduction Factors
    Acknowledgments
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -96,16 +96,20 @@ Table of Contents
    burstiness.  In practice, paced slow start can still leave
    performance on the table:
 
-   *  The sender typically starts by pacing packets for half an RTT and
-      then pausing.  When the bottleneck bandwidth is higher than the
-      paced rate, the bottleneck can remain idle for the other half of
-      each RTT.
-
-   *  Even when the bottleneck is being utilized, utilization remains
-      below capacity until queueing begins.
+   *  Senders commonly pace the initial window at a rate of N *
+      congestion_window / smoothed_rtt (e.g., QUIC Section 7.7 of
+      [RFC9002], or TCP for initial windows exceeding 10 in the Linux
+      kernel [I-D.draft-welzl-iccrg-pacing]), with N=2.  This causes
+      them to start by pacing packets for half an RTT and then pausing.
+      When the bottleneck bandwidth is higher than the paced rate, the
+      bottleneck can remain idle for the other half of each RTT.
 
    *  When the initial window is much smaller than the path BDP, many
       round-trips are required to ramp up.
+
+   *  When slow start overshoots, pacing can make it likely for a common
+      back-off factor of 0.5 or more to cause double losses
+      [I-D.draft-welzl-iccrg-pacing].
 
    These effects are particularly detrimental to short-lived flows,
    which may only have a few round-trips to send data and therefore
@@ -113,13 +117,16 @@ Table of Contents
 
    Rapid Start retains the initial-window-based probing model but
    mitigates these issues.  It paces the first full flight over a full
-   estimated RTT, allowing an initial window up to 2× that of classic
-   slow start at a comparable pacing rate.  It then grows the congestion
-   window by 3× per round-trip until queue buildup is observed, after
-   which it reverts to classic 2× growth.  When congestion is signaled,
-   Rapid Start momentarily blocks sending to allow the bottleneck queue
-   to drain slightly; it then resumes sending while reducing the window
-   gradually in proportion to delivered and lost bytes.  Doing so avoids
+   estimated RTT.  This allows an initial window up to 2× that of
+   classic paced slow start at a comparable pacing rate.  Here, with
+   "classic paced slow start", we mean an implementation that transmits
+   the first full flight at a rate of 2 * congestion_window /
+   smoothed_rtt.  It then grows the congestion window by 3× per round-
+   trip until queue buildup is observed, after which it reverts to
+   classic 2× growth.  When congestion is signaled, Rapid Start
+   momentarily blocks sending to allow the bottleneck queue to drain
+   slightly; it then resumes sending while reducing the window gradually
+   in proportion to delivered and lost bytes.  Doing so avoids
    burstiness as well as mitigating the risk of the bottleneck buffer
    becoming empty and the path becoming underutilized during recovery.
    After recovery, control is handed over to ordinary congestion
@@ -138,23 +145,26 @@ Table of Contents
 
    This section describes the algorithm used by Rapid Start.
 
-3.1.  Full-RTT Pacing
+3.1.  Full-RTT Pacing of the Initial Window
 
    Rapid Start uses a more aggressive growth factor than classic slow
-   start.  When such growth is used, sending the initial congestion
-   window as a short burst can make the sender observe a bottleneck
-   overflow earlier than it would under evenly paced transmission.  To
-   ensure that Rapid Start observes the path's queueing behavior rather
-   than sender-side burstiness, the sender SHOULD pace the packets over
-   a full RTT, using the current RTT estimate, when it first sends more
-   data than classic slow start with pacing would permit.
+   start.  Such growth can make the sender observe a bottleneck overflow
+   earlier than it would under evenly paced transmission.  To ensure
+   that Rapid Start observes the path's queueing behavior rather than
+   the effect of sender-side burstiness, the sender ought to pace the
+   packets over a full RTT, using the current RTT estimate, when it
+   first sends more data than classic slow start with pacing would
+   permit.
 
-   By pacing the packets over a full RTT, Rapid Start can use an initial
-   window up to 2× that of classic slow start with pacing; spreading the
-   transmission over a full RTT (rather than half an RTT) yields a
-   comparable pacing rate.  If this more aggressive transmission
-   overshoots and congestion is signaled, Rapid Start compensates by
-   reducing the congestion window as specified in Section 3.3.
+   A sender SHOULD pace the initial flight at no more than the rate that
+   classic paced slow start would use with the ordinary initial window,
+   without increasing the burst allowance.  By pacing these packets over
+   a full RTT instead of the common half-RTT implementation, Rapid Start
+   can use an initial window up to 2× that of classic paced slow start.
+   over a full RTT (rather than half an RTT) yields a comparable pacing
+   rate.  If this more aggressive transmission overshoots and congestion
+   is signaled, Rapid Start compensates by reducing the congestion
+   window as specified in Section 3.3.
 
    Careful Resume [CAREFUL-RESUME] provides a compatible way to realize
    these recommendations: it can defer entry to its Unvalidated Phase
@@ -375,6 +385,20 @@ Table of Contents
    entered due to a CE mark rather than a packet loss — for example,
    that of ABE ([RFC8511]).
 
+3.3.3.  Handing Over to CUBIC
+
+   When CUBIC [RFC9438] is used, W_max is set upon exiting the recovery
+   period.  As Rapid Start leaves the congestion window at beta times
+   the full BDP (Section 3.3), Rapid Start's estimate of the full BDP is
+   cwnd / beta.
+
+   In network environments with competing flows, where fast convergence
+   (Section 4.7 of [RFC9438]) is enabled, W_max SHOULD be set to twice
+   the estimated full BDP, the target that slow start would have reached
+   had it overshot by a full factor of two.  Adopting the smaller though
+   more accurate estimate would leave the Rapid Start flow growing less
+   rapidly than one that used slow start.
+
 4.  Considerations
 
    Rapid Start's startup and recovery behavior is driven by feedback
@@ -435,6 +459,13 @@ Table of Contents
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
 7.2.  Informative References
+
+   [I-D.draft-welzl-iccrg-pacing]
+              Welzl, M., Eddy, W., Goel, V., and M. Tüxen, "Pacing in
+              Transport Protocols", Work in Progress, Internet-Draft,
+              draft-welzl-iccrg-pacing-03, 7 July 2025,
+              <https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-
+              pacing-03>.
 
    [RFC6582]  Henderson, T., Floyd, S., Gurtov, A., and Y. Nishida, "The
               NewReno Modification to TCP's Fast Recovery Algorithm",
@@ -619,7 +650,7 @@ Acknowledgments
    recovery behavior, allowing the congestion window to smoothly
    converge before handing over to congestion avoidance.
 
-Author's Address
+Authors' Addresses
 
    Kazuho Oku
    Fastly
@@ -629,3 +660,12 @@ Author's Address
 
       奥 一穂
       Fastly
+
+
+   Michael Welzl
+   University of Oslo
+   PO Box 1080 Blindern
+   0316  Oslo
+   Norway
+   Email: michawe@ifi.uio.no
+   URI:   http://welzl.at/
