@@ -28,7 +28,6 @@ author:
 normative:
 
 informative:
-informative:
 I-D.draft-welzl-iccrg-pacing:
 
 ...
@@ -36,7 +35,7 @@ I-D.draft-welzl-iccrg-pacing:
 --- abstract
 
 This document defines Rapid Start, a congestion control startup algorithm. It
-starts by pacing initial window over a full RTT. It then
+starts by pacing the initial window over a full RTT. It then
 grows the window by 3× per RTT until queue buildup is observed, after which it
 reverts to classic 2× slow start growth. When congestion is signaled, Rapid
 Start smoothly converges the window based on delivered data, avoiding bursts and
@@ -54,7 +53,7 @@ window and use an exponential startup (“slow start”;
 bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:
 
-* Senders commonly pace the initial window at a rate of N \* congestion\_window / smoothed\_rtt (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
+* Senders commonly pace the initial window at a rate of `N \* congestion\_window / smoothed\_rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
   pausing. When the bottleneck bandwidth is higher than the paced rate, the
   bottleneck can remain idle for the other half of each RTT.
 * When the initial window is much smaller than the path BDP, many round-trips
@@ -67,16 +66,15 @@ underutilization during the startup.
 
 Rapid Start retains the initial-window-based probing model but mitigates these
 issues. It paces the initial window over a full estimated RTT. This allows to transmit an
-initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 \* congestion\_window / smoothed\_rtt, resulting in pacing over roughly
-half the RTT.
-It then grows the congestion window by 3× per round-trip until queue buildup is
+initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 \* congestion\_window / smoothed\_rtt, resulting in data transmission for roughly half the RTT.
+Rapid Start then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
 to drain slightly; it then resumes sending while reducing the window gradually
 in proportion to delivered and lost bytes. Doing so avoids burstiness as well as
 mitigating the risk of the bottleneck buffer becoming empty and the path
 becoming underutilized during recovery. After recovery, control is handed over
-to ordinary congestion avoidance, such as that of NewReno ({{?RFC6582}}) and
+to ordinary congestion avoidance, such as that of NewReno ({{?RFC6582}}) or
 QUIC congestion control ({{Section 7 of !RFC9002}}).
 
 
@@ -93,10 +91,7 @@ This section describes the algorithm used by Rapid Start.
 ## Full-RTT Pacing of the Initial Window
 
 Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
-make the sender observe a bottleneck overflow earlier than it would under evenly
-paced transmission. To ensure that Rapid Start observes the path's queueing
-behavior rather than the effect of sender-side burstiness, the sender ought to pace the packets
-over a full RTT, using the current RTT estimate, when it first sends more data
+make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT, using the current RTT estimate, when it first sends more data
 than classic slow start with pacing would permit.
 
 A sender SHOULD pace the initial window at no more than the rate that classic paced slow start would use with the ordinary initial window, without increasing the burst allowance.
