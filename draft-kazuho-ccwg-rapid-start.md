@@ -35,7 +35,7 @@ I-D.draft-welzl-iccrg-pacing:
 
 --- abstract
 
-This document defines Rapid Start, a congestion-control startup algorithm. It
+This document defines Rapid Start, a congestion control startup algorithm. It
 starts by pacing initial window over a full RTT. It then
 grows the window by 3× per RTT until queue buildup is observed, after which it
 reverts to classic 2× slow start growth. When congestion is signaled, Rapid
@@ -59,15 +59,16 @@ practice, paced slow start can still leave performance on the table:
   bottleneck can remain idle for the other half of each RTT.
 * When the initial window is much smaller than the path BDP, many round-trips
   are required to ramp up.
-* When slow start overshoots, pacing can make it likely for a common back-off factor of 0.5 or more to cause double losses {{Section 4.1.1 of ?I-D.draft-welzl-iccrg-pacing}}.
+* When slow start overshoots, pacing can make it more likely that the capacity of the path is fully utilized. In this case, backing off by multiplying the congestion window with a factor `beta` >= 0.5 can cause double losses {{Section 4.1.1 of ?I-D.draft-welzl-iccrg-pacing}}.
 
 These effects are particularly detrimental to short-lived flows, which may only
 have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.
 
 Rapid Start retains the initial-window-based probing model but mitigates these
-issues. It paces the initial window over a full estimated RTT. This allows an
-initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 \* congestion\_window / smoothed\_rtt.
+issues. It paces the initial window over a full estimated RTT. This allows to transmit an
+initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 \* congestion\_window / smoothed\_rtt, resulting in pacing over roughly
+half the RTT.
 It then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
