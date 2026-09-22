@@ -1235,7 +1235,7 @@ bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:<a href="#section-1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1-2.1">
-          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of <code>N \* congestion\_window / smoothed\_rtt</code> (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
+          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of <code>N * congestion_window / smoothed_rtt</code> (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
 pausing. When the bottleneck bandwidth is higher than the paced rate, the
 bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -1244,7 +1244,7 @@ bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.
 are required to ramp up.<a href="#section-1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-2.3">
-          <p id="section-1-2.3.1">When slow start overshoots, pacing can make it more likely that the capacity of the path is fully utilized. In this case, backing off by multiplying the congestion window with a factor <code>beta</code> &gt;= 0.5 can cause double losses <span><a href="https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-pacing-03#section-4.1.1" class="relref">Section 4.1.1</a> of [<a href="#I-D.draft-welzl-iccrg-pacing" class="cite xref">I-D.draft-welzl-iccrg-pacing</a>]</span>.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
+          <p id="section-1-2.3.1">When slow start overshoots, pacing can make it more likely that the capacity of the path is fully utilized. In this case, backing off by multiplying the congestion window with a factor <code>beta</code> &gt;= 0.5 can cause double losses <span><a href="https://datatracker.ietf.org/doc/html/draft-irtf-iccrg-pacing-04#section-4.1.1" class="relref">Section 4.1.1</a> of [<a href="#I-D.irtf-iccrg-pacing" class="cite xref">I-D.irtf-iccrg-pacing</a>]</span>.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-3">These effects are particularly detrimental to short-lived flows, which may only
@@ -1252,7 +1252,7 @@ have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Rapid Start retains the initial-window-based probing model but mitigates these
 issues. It paces the initial window over a full estimated RTT. This allows to transmit an
-initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 * congestion_window / smoothed_rtt, resulting in data transmission for roughly half the RTT.
+initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of <code>2 * congestion_window / smoothed_rtt</code>, resulting in data transmission for roughly half the RTT.
 Rapid Start then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
@@ -1628,9 +1628,9 @@ required delivered/lost byte accounting can be approximated robustly.<a href="#s
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.draft-welzl-iccrg-pacing">[I-D.draft-welzl-iccrg-pacing]</dt>
+<dt id="I-D.irtf-iccrg-pacing">[I-D.irtf-iccrg-pacing]</dt>
         <dd>
-<span class="refAuthor">Welzl, M.</span>, <span class="refAuthor">Eddy, W.</span>, <span class="refAuthor">Goel, V.</span>, and <span class="refAuthor">M. Tüxen</span>, <span class="refTitle">"Pacing in Transport Protocols"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-welzl-iccrg-pacing-03</span>, <time datetime="2025-07-07" class="refDate">7 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-pacing-03">https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-pacing-03</a>&gt;</span>. </dd>
+<span class="refAuthor">Welzl, M.</span>, <span class="refAuthor">Eddy, W.</span>, <span class="refAuthor">Goel, V.</span>, and <span class="refAuthor">M. Tüxen</span>, <span class="refTitle">"Pacing in Transport Protocols"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-iccrg-pacing-04</span>, <time datetime="2026-09-15" class="refDate">15 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-iccrg-pacing-04">https://datatracker.ietf.org/doc/html/draft-irtf-iccrg-pacing-04</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6582">[RFC6582]</dt>
         <dd>
