@@ -28,7 +28,7 @@ author:
 normative:
 
 informative:
-I-D.draft-welzl-iccrg-pacing:
+I-D.irtf-iccrg-pacing:
 
 ...
 
@@ -53,12 +53,12 @@ window and use an exponential startup (“slow start”;
 bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:
 
-* Senders commonly pace the initial window at a rate of `N \* congestion\_window / smoothed\_rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
+* Senders commonly pace the initial window at a rate of `N * congestion_window / smoothed_rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
   pausing. When the bottleneck bandwidth is higher than the paced rate, the
   bottleneck can remain idle for the other half of each RTT.
 * When the initial window is much smaller than the path BDP, many round-trips
   are required to ramp up.
-* When slow start overshoots, pacing can make it more likely that the capacity of the path is fully utilized. In this case, backing off by multiplying the congestion window with a factor `beta` >= 0.5 can cause double losses {{Section 4.1.1 of ?I-D.draft-welzl-iccrg-pacing}}.
+* When slow start overshoots, pacing can make it more likely that the capacity of the path is fully utilized. In this case, backing off by multiplying the congestion window with a factor `beta` >= 0.5 can cause double losses {{Section 4.1.1 of ?I-D.irtf-iccrg-pacing}}.
 
 These effects are particularly detrimental to short-lived flows, which may only
 have a few round-trips to send data and therefore suffer disproportionately from
@@ -66,7 +66,7 @@ underutilization during the startup.
 
 Rapid Start retains the initial-window-based probing model but mitigates these
 issues. It paces the initial window over a full estimated RTT. This allows to transmit an
-initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 \* congestion\_window / smoothed\_rtt, resulting in data transmission for roughly half the RTT.
+initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of `2 * congestion_window / smoothed_rtt`, resulting in data transmission for roughly half the RTT.
 Rapid Start then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
