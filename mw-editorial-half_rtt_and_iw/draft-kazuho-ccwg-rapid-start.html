@@ -9,7 +9,7 @@
 <meta content="Michael Welzl" name="author">
 <meta content="
        This document defines Rapid Start, a congestion-control startup algorithm. It
-starts by pacing first full flight over a full RTT. It then
+starts by pacing initial window over a full RTT. It then
 grows the window by 3× per RTT until queue buildup is observed, after which it
 reverts to classic 2× slow start growth. When congestion is signaled, Rapid
 Start smoothly converges the window based on delivered data, avoiding bursts and
@@ -1088,7 +1088,7 @@ svg {
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This document defines Rapid Start, a congestion-control startup algorithm. It
-starts by pacing first full flight over a full RTT. It then
+starts by pacing initial window over a full RTT. It then
 grows the window by 3× per RTT until queue buildup is observed, after which it
 reverts to classic 2× slow start growth. When congestion is signaled, Rapid
 Start smoothly converges the window based on delivered data, avoiding bursts and
@@ -1235,7 +1235,7 @@ bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:<a href="#section-1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1-2.1">
-          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of N * congestion_window / smoothed_rtt (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>, or TCP for initial windows exceeding 10 in the Linux kernel <span>[<a href="#I-D.draft-welzl-iccrg-pacing" class="cite xref">I-D.draft-welzl-iccrg-pacing</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
+          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of N * congestion_window / smoothed_rtt (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
 pausing. When the bottleneck bandwidth is higher than the paced rate, the
 bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -1244,15 +1244,15 @@ bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.
 are required to ramp up.<a href="#section-1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-2.3">
-          <p id="section-1-2.3.1">When slow start overshoots, pacing can make it likely for a common back-off factor of 0.5 or more to cause double losses <span>[<a href="#I-D.draft-welzl-iccrg-pacing" class="cite xref">I-D.draft-welzl-iccrg-pacing</a>]</span>.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
+          <p id="section-1-2.3.1">When slow start overshoots, pacing can make it likely for a common back-off factor of 0.5 or more to cause double losses <span><a href="https://datatracker.ietf.org/doc/html/draft-welzl-iccrg-pacing-03#section-4.1.1" class="relref">Section 4.1.1</a> of [<a href="#I-D.draft-welzl-iccrg-pacing" class="cite xref">I-D.draft-welzl-iccrg-pacing</a>]</span>.<a href="#section-1-2.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-3">These effects are particularly detrimental to short-lived flows, which may only
 have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Rapid Start retains the initial-window-based probing model but mitigates these
-issues. It paces the first full flight over a full estimated RTT. This allows an
-initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the first full flight at a rate of 2 * congestion_window / smoothed_rtt.
+issues. It paces the initial window over a full estimated RTT. This allows an
+initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of 2 * congestion_window / smoothed_rtt.
 It then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
@@ -1292,7 +1292,7 @@ paced transmission. To ensure that Rapid Start observes the path's queueing
 behavior rather than the effect of sender-side burstiness, the sender ought to pace the packets
 over a full RTT, using the current RTT estimate, when it first sends more data
 than classic slow start with pacing would permit.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.1-2">A sender <span class="bcp14">SHOULD</span> pace the initial flight at no more than the rate that classic paced slow start would use with the ordinary initial window, without increasing the burst allowance.
+<p id="section-3.1-2">A sender <span class="bcp14">SHOULD</span> pace the initial window at no more than the rate that classic paced slow start would use with the ordinary initial window, without increasing the burst allowance.
 By pacing these packets over a full RTT instead of the common half-RTT implementation, Rapid Start can use an initial window up
 to 2× that of classic paced slow start. over a
 full RTT (rather than half an RTT) yields a comparable pacing rate. If this more
@@ -1363,7 +1363,7 @@ bottleneck queue to drain slightly, then gradually reduces the congestion window
 during recovery.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
 <p id="section-3.3-2">When entering the recovery period, the sender slightly scales down the current
 congestion window using a silence factor. As a result of this reduction,
-sending is momentarily blocked until bytes-in-flight is no greater than the
+sending is momentarily blocked until the amount of bytes in flight is no greater than the
 reduced congestion window, allowing the bottleneck queue to be drained by a
 controlled amount.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3-3">
@@ -1820,11 +1820,11 @@ loss_factor     = beta + K * (1 - beta)
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-B-1">Rapid Start combines three ideas: (1) pacing the first full flight over a full
+<p id="appendix-B-1">Rapid Start combines three ideas: (1) pacing the initial window over a full
 RTT, (2) a more aggressive startup increase when queue buildup is not observed,
 and (3) a recovery behavior that smoothly converges the congestion window.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 <p id="appendix-B-2">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a predecessor for (1): it paces the
-first flight over a full RTT, based on a current RTT estimate, to avoid bursts
+initial window over a full RTT, based on a current RTT estimate, to avoid bursts
 when (re)starting. Rapid Start applies the same full-RTT pacing principle when
 starting.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
 <p id="appendix-B-3">"SUSS: Improving TCP Performance by Speeding Up Slow-Start" (Mahdi Arghavani et
