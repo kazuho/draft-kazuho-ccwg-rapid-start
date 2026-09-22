@@ -67,7 +67,7 @@ underutilization during the startup.
 
 Rapid Start retains the initial-window-based probing model but mitigates these
 issues. It paces the first full flight over a full estimated RTT. This allows an
-initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the first full flight at a rate of 2 \* congestion\_window / smoothed\_rtt. 
+initial window up to 2× that of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the first full flight at a rate of 2 \* congestion\_window / smoothed\_rtt.
 It then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
