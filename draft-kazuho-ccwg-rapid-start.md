@@ -29,7 +29,7 @@ normative:
 
 informative:
 informative:
-I-D.irtf-iccrg-pacing:
+I-D.draft-welzl-iccrg-pacing:
 
 ...
 
