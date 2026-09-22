@@ -1163,7 +1163,15 @@ underutilization, before handing over to ordinary congestion avoidance.<a href="
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-algorithm" class="internal xref">Algorithm</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
-                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-full-rtt-pacing-of-the-init" class="internal xref">Full-RTT Pacing of the Initial Window</a></p>
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-full-rtt-pacing" class="internal xref">Full-RTT Pacing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.1">
+                    <p id="section-toc.1-1.3.2.1.2.1.1" class="keepWithNext"><a href="#section-3.1.1" class="auto internal xref">3.1.1</a>.  <a href="#name-initial-window" class="internal xref">Initial Window</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.2">
+                    <p id="section-toc.1-1.3.2.1.2.2.1"><a href="#section-3.1.2" class="auto internal xref">3.1.2</a>.  <a href="#name-later-rounds" class="internal xref">Later Rounds</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
                 <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-increasing-the-congestion-w" class="internal xref">Increasing the Congestion Window</a></p>
@@ -1281,26 +1289,37 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-algorithm" class="section-name selfRef">Algorithm</a>
       </h2>
 <p id="section-3-1">This section describes the algorithm used by Rapid Start.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<div id="full-rtt-pacing-of-the-initial-window">
+<div id="full-rtt-pacing">
 <section id="section-3.1">
-        <h3 id="name-full-rtt-pacing-of-the-init">
-<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-full-rtt-pacing-of-the-init" class="section-name selfRef">Full-RTT Pacing of the Initial Window</a>
+        <h3 id="name-full-rtt-pacing">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-full-rtt-pacing" class="section-name selfRef">Full-RTT Pacing</a>
         </h3>
-<p id="section-3.1-1">Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
-make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT, using the current RTT estimate, when it first sends more data
-than classic slow start with pacing would permit.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.1-2">A sender <span class="bcp14">SHOULD</span> pace the initial window at no more than the rate that classic paced slow start would use with the ordinary initial window, without increasing the burst allowance.
-By pacing these packets over a full RTT instead of the common half-RTT implementation, Rapid Start can use an initial window up
-to 2× that of classic paced slow start. over a
-full RTT (rather than half an RTT) yields a comparable pacing rate. If this more
-aggressive transmission overshoots and congestion is signaled, Rapid Start
-compensates by reducing the congestion window as specified in
-<a href="#congestion-handling" class="auto internal xref">Section 3.3</a>.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.1-3">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a
+<div id="initial-window">
+<section id="section-3.1.1">
+          <h4 id="name-initial-window">
+<a href="#section-3.1.1" class="section-number selfRef">3.1.1. </a><a href="#name-initial-window" class="section-name selfRef">Initial Window</a>
+          </h4>
+<p id="section-3.1.1-1">A sender <span class="bcp14">SHOULD</span> pace the initial window over the full RTT, at no more than the rate that classic paced slow start would use with the ordinary initial window. This can be attained by pacing at a rate of <code>initial_window / smoothed_rtt</code>, using an initial window that is twice as large as the initial window of classic paced slow start.<a href="#section-3.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.1-2">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a
 compatible way to realize these recommendations: it can defer entry to its
 Unvalidated Phase until the sender first sends more data than normal congestion
 control would permit, and it requires packets sent in that phase to be paced
-based on the current RTT.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+based on the current RTT.<a href="#section-3.1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="later-rounds">
+<section id="section-3.1.2">
+          <h4 id="name-later-rounds">
+<a href="#section-3.1.2" class="section-number selfRef">3.1.2. </a><a href="#name-later-rounds" class="section-name selfRef">Later Rounds</a>
+          </h4>
+<p id="section-3.1.2-1">Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
+make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT.<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.2-2">If this more
+aggressive transmission overshoots and congestion is signaled, Rapid Start
+compensates by reducing the congestion window as specified in
+<a href="#congestion-handling" class="auto internal xref">Section 3.3</a>.<a href="#section-3.1.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="increasing-the-congestion-window">
