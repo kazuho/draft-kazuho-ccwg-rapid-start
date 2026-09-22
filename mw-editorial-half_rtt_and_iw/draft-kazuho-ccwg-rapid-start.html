@@ -1243,7 +1243,7 @@ bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:<a href="#section-1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1-2.1">
-          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of <code>N * congestion_window / smoothed_rtt</code> (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
+          <p id="section-1-2.1.1">Senders commonly pace the initial window at a rate of <code>N * initial window / smoothed rtt</code> (e.g., QUIC <span><a href="https://rfc-editor.org/rfc/rfc9002#section-7.7" class="relref">Section 7.7</a> of [<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>), with N=2. This causes them to start by pacing packets for half an RTT and then
 pausing. When the bottleneck bandwidth is higher than the paced rate, the
 bottleneck can remain idle for the other half of each RTT.<a href="#section-1-2.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -1260,7 +1260,7 @@ have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Rapid Start retains the initial-window-based probing model but mitigates these
 issues. It paces the initial window over a full estimated RTT. This allows to transmit an
-initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of <code>2 * congestion_window / smoothed_rtt</code>, resulting in data transmission for roughly half the RTT.
+initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of <code>2 * initial window / smoothed rtt</code>, resulting in data transmission for roughly half the RTT.
 Rapid Start then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
 signaled, Rapid Start momentarily blocks sending to allow the bottleneck queue
@@ -1299,7 +1299,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <h4 id="name-initial-window">
 <a href="#section-3.1.1" class="section-number selfRef">3.1.1. </a><a href="#name-initial-window" class="section-name selfRef">Initial Window</a>
           </h4>
-<p id="section-3.1.1-1">A sender <span class="bcp14">SHOULD</span> pace the initial window over the full RTT, at no more than the rate that classic paced slow start would use with the ordinary initial window. This can be attained by pacing at a rate of <code>initial_window / smoothed_rtt</code>, using an initial window that is twice as large as the initial window of classic paced slow start.<a href="#section-3.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.1-1">A sender <span class="bcp14">SHOULD</span> pace the initial window over the full RTT, at no more than the rate that classic paced slow start would use with the ordinary initial window. This can be attained by pacing at a rate of <code>initial_window / smoothed_rtt</code>, using an initial window that is up to twice as large as the initial window of classic paced slow start.<a href="#section-3.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1.1-2">Careful Resume <span>[<a href="#CAREFUL-RESUME" class="cite xref">CAREFUL-RESUME</a>]</span> provides a
 compatible way to realize these recommendations: it can defer entry to its
 Unvalidated Phase until the sender first sends more data than normal congestion
@@ -1312,8 +1312,7 @@ based on the current RTT.<a href="#section-3.1.1-2" class="pilcrow">¶</a></p>
           <h4 id="name-later-rounds">
 <a href="#section-3.1.2" class="section-number selfRef">3.1.2. </a><a href="#name-later-rounds" class="section-name selfRef">Later Rounds</a>
           </h4>
-<p id="section-3.1.2-1">Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
-make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT.<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.2-1">Rapid Start uses a larger growth factor than classic slow start. Such growth can make the sender observe a bottleneck queue overflow earlier than with the common 2× growth factor. To make it more likely that Rapid Start will saturate the path's capacity despite its larger growth factor, the sender ought to pace the packets over the full RTT.<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.1.2-2">If this more
 aggressive transmission overshoots and congestion is signaled, Rapid Start
 compensates by reducing the congestion window as specified in
@@ -1379,7 +1378,7 @@ bottleneck queue to drain slightly, then gradually reduces the congestion window
 during recovery.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
 <p id="section-3.3-2">When entering the recovery period, the sender slightly scales down the current
 congestion window using a silence factor. As a result of this reduction,
-sending is momentarily blocked until the amount of bytes in flight is no greater than the
+sending is momentarily blocked until the number of bytes in flight is no greater than the
 reduced congestion window, allowing the bottleneck queue to be drained by a
 controlled amount.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-3.3-3">
@@ -1535,8 +1534,7 @@ avoided. The benefits of faster growth of the congestion window are thus more
 reliable.<a href="#section-3.3.2-5" class="pilcrow">¶</a></p>
 <p id="section-3.3.2-6">Rapid Start does not specify <code>beta</code>; the factors of <a href="#reduction-factors" class="auto internal xref">Section 3.3.1</a> are
 functions of whichever window decrease factor the sender uses. Because a CE mark
-is typically emitted before the bottleneck queue overflows, that factor can be
-less aggressive when recovery is entered due to a CE mark rather than a packet
+is typically emitted before the bottleneck queue overflows, the value for <code>beta</code> can be larger when recovery is entered due to a CE mark rather than a packet
 loss — for example, that of ABE (<span>[<a href="#RFC8511" class="cite xref">RFC8511</a>]</span>).<a href="#section-3.3.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
