@@ -88,25 +88,28 @@ QUIC congestion control ({{Section 7 of !RFC9002}}).
 This section describes the algorithm used by Rapid Start.
 
 
-## Full-RTT Pacing of the Initial Window
+## Full-RTT Pacing
 
-Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
-make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT, using the current RTT estimate, when it first sends more data
-than classic slow start with pacing would permit.
+### Initial Window
 
-A sender SHOULD pace the initial window at no more than the rate that classic paced slow start would use with the ordinary initial window, without increasing the burst allowance.
-By pacing these packets over a full RTT instead of the common half-RTT implementation, Rapid Start can use an initial window up
-to 2× that of classic paced slow start. over a
-full RTT (rather than half an RTT) yields a comparable pacing rate. If this more
-aggressive transmission overshoots and congestion is signaled, Rapid Start
-compensates by reducing the congestion window as specified in
-{{congestion-handling}}.
+A sender SHOULD pace the initial window over the full RTT, at no more than the rate that classic paced slow start would use with the ordinary initial window. This can be attained by pacing at a rate of `initial_window / smoothed_rtt`, using an initial window that is twice as large as the initial window of classic paced slow start.
 
 Careful Resume {{?CAREFUL-RESUME=I-D.ietf-tsvwg-careful-resume}} provides a
 compatible way to realize these recommendations: it can defer entry to its
 Unvalidated Phase until the sender first sends more data than normal congestion
 control would permit, and it requires packets sent in that phase to be paced
 based on the current RTT.
+
+### Later Rounds
+
+Rapid Start uses a more aggressive growth factor than classic slow start. Such growth can
+make the sender observe a bottleneck overflow earlier than with the common 2× growth factor. To ensure that Rapid Start can saturate the path's capacity despite such more aggressive growth, the sender ought to pace the packets over a full RTT.
+
+If this more
+aggressive transmission overshoots and congestion is signaled, Rapid Start
+compensates by reducing the congestion window as specified in
+{{congestion-handling}}.
+
 
 
 ## Increasing the Congestion Window
