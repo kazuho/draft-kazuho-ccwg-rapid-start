@@ -54,7 +54,7 @@ window and use an exponential startup (“slow start”;
 bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:
 
-* Senders commonly pace the initial window at a rate of N \* congestion\_window / smoothed\_rtt (e.g., QUIC {{Section 7.7 of !RFC9002}}, or TCP for initial windows exceeding 10 in the Linux kernel {{Section 5.1 of I-D.irtf-iccrg-pacing}}), with N=2. This causes them to start by pacing packets for half an RTT and then
+* Senders commonly pace the initial window at a rate of N \* congestion\_window / smoothed\_rtt (e.g., QUIC {{Section 7.7 of !RFC9002}}, or TCP for initial windows exceeding 10 in the Linux kernel {{Section 5.1 of I-D.draft-welzl-iccrg-pacing}}), with N=2. This causes them to start by pacing packets for half an RTT and then
   pausing. When the bottleneck bandwidth is higher than the paced rate, the
   bottleneck can remain idle for the other half of each RTT.
 * When the initial window is much smaller than the path BDP, many round-trips
