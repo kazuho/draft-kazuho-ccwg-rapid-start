@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-30T03:56:13.839301+00:00",
+  "timestamp": "2026-09-24T03:25:20.269365+00:00",
   "repo": "kazuho/draft-kazuho-ccwg-rapid-start",
   "labels": [
     {
@@ -720,6 +720,32 @@
           "updatedAt": "2026-08-28T08:03:20Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOQNz9Nc8AAAABEj_GDA",
+      "title": "Making a start at simplifying the text a bit",
+      "url": "https://github.com/kazuho/draft-kazuho-ccwg-rapid-start/pull/21",
+      "state": "OPEN",
+      "author": "mwelzl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-09-22T10:46:27Z",
+      "updatedAt": "2026-09-22T13:56:14Z",
+      "baseRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "baseRefName": "main",
+      "baseRefOid": "24bb1e602c519818e397b70bbb7b0aa8ee52157c",
+      "headRepository": "kazuho/draft-kazuho-ccwg-rapid-start",
+      "headRefName": "mw-editorial-half_rtt_and_iw",
+      "headRefOid": "00e5ea1d30a8256a083c25b5791017a68936282b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]
