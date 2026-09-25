@@ -65,7 +65,7 @@ have a few round-trips to send data and therefore suffer disproportionately from
 underutilization during the startup.
 
 Rapid Start retains the initial-window-based probing model but mitigates these
-issues. It paces the initial window over a full estimated RTT. This allows to transmit an
+issues. It paces the initial window over a full estimated RTT. This allows the sender to transmit an
 initial window that is up to twice as large as the initial window of classic paced slow start at a comparable pacing rate. Here, with "classic paced slow start", we mean an implementation that transmits the initial window at a rate of `2 * initial window / smoothed rtt`, resulting in data transmission for roughly half the RTT.
 Rapid Start then grows the congestion window by 3× per round-trip until queue buildup is
 observed, after which it reverts to classic 2× growth. When congestion is
