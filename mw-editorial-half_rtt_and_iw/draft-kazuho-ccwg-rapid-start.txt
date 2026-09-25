@@ -5,8 +5,8 @@
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
 Intended status: Standards Track                                M. Welzl
-Expires: 26 March 2027                                University of Oslo
-                                                       22 September 2026
+Expires: 29 March 2027                                University of Oslo
+                                                       25 September 2026
 
 
                   Rapid Startup of Congestion Control
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 March 2027.
+   This Internet-Draft will expire on 29 March 2027.
 
 Copyright Notice
 
@@ -119,22 +119,22 @@ Table of Contents
 
    Rapid Start retains the initial-window-based probing model but
    mitigates these issues.  It paces the initial window over a full
-   estimated RTT.  This allows to transmit an initial window that is up
-   to twice as large as the initial window of classic paced slow start
-   at a comparable pacing rate.  Here, with "classic paced slow start",
-   we mean an implementation that transmits the initial window at a rate
-   of 2 * initial window / smoothed rtt, resulting in data transmission
-   for roughly half the RTT.  Rapid Start then grows the congestion
-   window by 3× per round-trip until queue buildup is observed, after
-   which it reverts to classic 2× growth.  When congestion is signaled,
-   Rapid Start momentarily blocks sending to allow the bottleneck queue
-   to drain slightly; it then resumes sending while reducing the window
-   gradually in proportion to delivered and lost bytes.  Doing so avoids
-   burstiness as well as mitigating the risk of the bottleneck buffer
-   becoming empty and the path becoming underutilized during recovery.
-   After recovery, control is handed over to ordinary congestion
-   avoidance, such as that of NewReno ([RFC6582]) or QUIC congestion
-   control (Section 7 of [RFC9002]).
+   estimated RTT.  This allows the sender to transmit an initial window
+   that is up to twice as large as the initial window of classic paced
+   slow start at a comparable pacing rate.  Here, with "classic paced
+   slow start", we mean an implementation that transmits the initial
+   window at a rate of 2 * initial window / smoothed rtt, resulting in
+   data transmission for roughly half the RTT.  Rapid Start then grows
+   the congestion window by 3× per round-trip until queue buildup is
+   observed, after which it reverts to classic 2× growth.  When
+   congestion is signaled, Rapid Start momentarily blocks sending to
+   allow the bottleneck queue to drain slightly; it then resumes sending
+   while reducing the window gradually in proportion to delivered and
+   lost bytes.  Doing so avoids burstiness as well as mitigating the
+   risk of the bottleneck buffer becoming empty and the path becoming
+   underutilized during recovery.  After recovery, control is handed
+   over to ordinary congestion avoidance, such as that of NewReno
+   ([RFC6582]) or QUIC congestion control (Section 7 of [RFC9002]).
 
 2.  Conventions and Definitions
 
