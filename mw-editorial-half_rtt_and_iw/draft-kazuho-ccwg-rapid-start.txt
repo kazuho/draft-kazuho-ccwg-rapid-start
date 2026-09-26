@@ -5,8 +5,8 @@
 ccwg                                                    奥 一穂 (K. Oku)
 Internet-Draft                                                    Fastly
 Intended status: Standards Track                                M. Welzl
-Expires: 29 March 2027                                University of Oslo
-                                                       25 September 2026
+Expires: 30 March 2027                                University of Oslo
+                                                       26 September 2026
 
 
                   Rapid Startup of Congestion Control
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 March 2027.
+   This Internet-Draft will expire on 30 March 2027.
 
 Copyright Notice
 
@@ -98,12 +98,12 @@ Table of Contents
    burstiness.  In practice, paced slow start can still leave
    performance on the table:
 
-   *  Senders commonly pace the initial window at a rate of N * initial
-      window / smoothed rtt (e.g., QUIC Section 7.7 of [RFC9002]), with
-      N=2.  This causes them to start by pacing packets for half an RTT
-      and then pausing.  When the bottleneck bandwidth is higher than
-      the paced rate, the bottleneck can remain idle for the other half
-      of each RTT.
+   *  Senders commonly calculate their initial pacing rate as N *
+      initial window / smoothed rtt (e.g., QUIC Section 7.7 of
+      [RFC9002]), with N=2.  This causes them to complete sending the
+      initial window within half an RTT and then pause.  When the
+      bottleneck bandwidth is higher than the paced rate, the bottleneck
+      can remain idle for the other half of each RTT.
 
    *  When the initial window is much smaller than the path BDP, many
       round-trips are required to ramp up.
