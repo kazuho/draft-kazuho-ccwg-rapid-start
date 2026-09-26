@@ -53,8 +53,8 @@ window and use an exponential startup (“slow start”;
 bottleneck, often paired with pacing to reduce sender-side burstiness. In
 practice, paced slow start can still leave performance on the table:
 
-* Senders commonly pace the initial window at a rate of `N * initial window / smoothed rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to start by pacing packets for half an RTT and then
-  pausing. When the bottleneck bandwidth is higher than the paced rate, the
+* Senders commonly calculate their initial pacing rate as `N * initial window / smoothed rtt` (e.g., QUIC {{Section 7.7 of !RFC9002}}), with N=2. This causes them to complete sending the initial window within half an RTT and then
+  pause. When the bottleneck bandwidth is higher than the paced rate, the
   bottleneck can remain idle for the other half of each RTT.
 * When the initial window is much smaller than the path BDP, many round-trips
   are required to ramp up.
